@@ -95,7 +95,7 @@ class _PhotosSliderState extends State<PhotosSlider> {
                     visible: true,
                     replyFun: () {
                       cubit.shareOneFile(
-                          path: widget.photos[id].path, toWhatsapp: true);
+                          path: widget.photos[id].path, toWhatsapp: true, context: context);
                     },
                     shareFun: () {
                       cubit.shareOneFile(

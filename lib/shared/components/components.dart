@@ -1,6 +1,5 @@
 import 'dart:io';
 
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
@@ -237,11 +236,23 @@ Widget permissionDeniedView(StoryCubit cubit) {
   );
 }
 
-void share({required StoryCubit cubit, required bool isToWhatsApp, required index, required context}) {
+void share(
+    {required StoryCubit cubit,
+    required bool isToWhatsApp,
+    required index,
+    required context}) {
   if (cubit.index == 0) {
-    cubit.shareFiles(type: FileType.Photos, shareToWhatsApp: isToWhatsApp, context: context, );
+    cubit.shareFiles(
+      type: FileType.Photos,
+      shareToWhatsApp: isToWhatsApp,
+      context: context,
+    );
   } else if (cubit.index == 1) {
-    cubit.shareFiles(type: FileType.Videos, shareToWhatsApp: isToWhatsApp, context: context, );
+    cubit.shareFiles(
+      type: FileType.Videos,
+      shareToWhatsApp: isToWhatsApp,
+      context: context,
+    );
   }
 }
 
@@ -435,16 +446,20 @@ Future<void> aboutUsDialog({
   );
 }
 
-Future<void> askDialogRepost(
-    {required context,required type,}) async {
+Future<void> askDialogRepost({
+  required context,
+  required shareOneFile,
+  required type,
+}) async {
   return showDialog<void>(
     context: context,
     builder: (BuildContext context0) {
       return AlertDialog(
-        title: Text('Replay to',
-        style:TextStyle(
-            color:isDark ? Colors.white : Colors.grey[700],
-        ),
+        title: Text(
+          'Replay to',
+          style: TextStyle(
+            color: isDark ? Colors.white : Colors.grey[700],
+          ),
         ),
         backgroundColor: isDark ? const Color(0xff0f1c1e) : Colors.white,
         content: SingleChildScrollView(
@@ -453,14 +468,17 @@ Future<void> askDialogRepost(
               defaultSelectButton(
                 context: context,
                 title: 'WhatsApp',
-                id: 0, type: type,
+                id: 0,
+                type: type,
+                shareOneFile: shareOneFile,
               ),
               const SizedBox(height: 8),
               defaultSelectButton(
                 context: context,
                 title: 'Business WhatsApp',
                 id: 1,
-                  type: type,
+                type: type,
+                shareOneFile: shareOneFile,
               ),
             ],
           ),
@@ -492,44 +510,54 @@ Widget defaultSelectButton({
   required String title,
   required int id,
   required type,
+  required bool shareOneFile,
 }) =>
     MaterialButton(
       color: Colors.green,
       height: 60,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(5.0))),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(5.0))),
       onPressed: () {
         Navigator.pop(context);
-        StoryCubit.get(context).shareFiles(
-          type: type,
-          context: context,
-          shareToWhatsApp: true,
-            whatsappType: id==0?WhatsappType.Whatsapp:WhatsappType.BusinessWhatsapp,
-        );
+        if (shareOneFile) {
+          StoryCubit.get(context).shareOneFile(
+            context: context,path: '',
+            toWhatsapp: true,
+            whatsappType:
+                id == 0 ? WhatsappType.Whatsapp : WhatsappType.BusinessWhatsapp,
+          );
+        } else {
+          StoryCubit.get(context).shareFiles(
+            type: type,
+            context: context,
+            shareToWhatsApp: true,
+            whatsappType:
+                id == 0 ? WhatsappType.Whatsapp : WhatsappType.BusinessWhatsapp,
+          );
+        }
       },
       child: Row(
         children: [
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.whatsapp,
-                      color:  Colors.white,
-                      size: 30),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: const TextStyle(
-                        color:  Colors.white,
-                        fontWeight: FontWeight.w500,
-                      ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.whatsapp, color: Colors.white, size: 30),
+                const SizedBox(width: 5),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const Icon(Icons.arrow_right, color: Colors.white,),
-                ],
-              ),
+                ),
+                const Icon(
+                  Icons.arrow_right,
+                  color: Colors.white,
+                ),
+              ],
             ),
           ),
         ],

@@ -356,30 +356,40 @@ class StoryCubit extends Cubit<StoryStates> {
       isBusinessWhatsappInstalled = false;
     });
   }
+  String shareOneFilePath = '';
 
-  Future shareOneFile({required String path, required bool toWhatsapp}) async {
+  Future shareOneFile({String? path, required bool toWhatsapp, WhatsappType? whatsappType, context}) async {
     if (!toWhatsapp) {
-      await Share.shareFiles([path]);
+      await Share.shareFiles([path!]);
       return;
     }
-    await checkInstalledWhatsApp();
-    if (!isWhatsappInstalled && !isBusinessWhatsappInstalled) {
-      toastShow(
-          text: 'Please install WhatsApp first!', state: ToastStates.ERROR);
-      return;
-    }
-
-    if (isWhatsappInstalled) {
+    if (whatsappType != null) {
       await WhatsappShare.shareFile(
-        package: Package.whatsapp,
+        package: whatsappType == WhatsappType.Whatsapp
+            ? Package.whatsapp
+            : Package.businessWhatsapp,
         phone: '+',
-        filePath: [path],
+        filePath: [shareOneFilePath],
+      ).then((value) {
+        whatsappType = null;
+        shareOneFilePath = '';
+      });
+      return;
+    }
+    shareOneFilePath = path!;
+    await checkInstalledWhatsApp();
+    if (isWhatsappInstalled && isBusinessWhatsappInstalled) {
+      askDialogRepost(
+        type: FileType.Photos,
+        context: context,
+        shareOneFile: true,
       );
     } else {
       await WhatsappShare.shareFile(
-        package: Package.businessWhatsapp,
+        package:
+        isWhatsappInstalled ? Package.whatsapp : Package.businessWhatsapp,
         phone: '+',
-        filePath: [path],
+        filePath: shareFilesPath,
       );
     }
   }
@@ -392,6 +402,7 @@ class StoryCubit extends Cubit<StoryStates> {
     required BuildContext context,
     WhatsappType? whatsappType,
   }) async {
+
     if (whatsappType != null) {
       await WhatsappShare.shareFile(
         package: whatsappType == WhatsappType.Whatsapp
@@ -418,6 +429,7 @@ class StoryCubit extends Cubit<StoryStates> {
 
     if (shareToWhatsApp) {
       await checkInstalledWhatsApp();
+      print('$isWhatsappInstalled  $isBusinessWhatsappInstalled');
       if (!isWhatsappInstalled && !isBusinessWhatsappInstalled) {
         toastShow(
             text: 'Please install WhatsApp first!', state: ToastStates.ERROR);
@@ -426,7 +438,7 @@ class StoryCubit extends Cubit<StoryStates> {
       if (isWhatsappInstalled && isBusinessWhatsappInstalled) {
         askDialogRepost(
           context: context,
-          type: type,
+          type: type, shareOneFile: false,
         );
       } else {
         await WhatsappShare.shareFile(

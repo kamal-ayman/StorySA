@@ -262,7 +262,7 @@ class _VideoScreenState extends State<VideoScreen> {
                                       splashRadius: 20,
                                       onPressed: () async {
                                         cubit.shareOneFile(
-                                            path: file.path, toWhatsapp: true);
+                                            path: file.path, toWhatsapp: true, context: context);
                                       },
                                       icon: const Icon(
                                         CupertinoIcons.reply,
