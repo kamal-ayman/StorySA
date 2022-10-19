@@ -436,7 +436,7 @@ Future<void> aboutUsDialog({
                   link: 'https://www.linkedin.com/in/kamal-ayman/'),
               defaultLinkButton(
                   color: Colors.blue.shade900,
-                  title: 'FaceBook',
+                  title: 'Facebook',
                   link: 'https://www.facebook.com/kamalayman159/'),
             ],
           ),

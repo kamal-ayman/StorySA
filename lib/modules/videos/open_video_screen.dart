@@ -7,7 +7,6 @@ import 'package:video_player/video_player.dart';
 import 'package:whatsapp_story/shared/cubit/cubit.dart';
 import '../../shared/cubit/states.dart';
 
-
 class VideoScreen extends StatefulWidget {
   late File file;
   late int id;
@@ -57,7 +56,8 @@ class _VideoScreenState extends State<VideoScreen> {
         var cubit = StoryCubit.get(context);
         return WillPopScope(
           onWillPop: () async {
-            SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
+            SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                overlays: SystemUiOverlay.values);
             return true;
           },
           child: Scaffold(
@@ -165,10 +165,10 @@ class _VideoScreenState extends State<VideoScreen> {
                                               MaterialPageRoute(
                                                 builder: (context) {
                                                   return VideoScreen(
-                                                        file: StoryCubit.get(
-                                                                context)
-                                                            .videos[id + 1],
-                                                        id: id + 1);
+                                                      file: StoryCubit.get(
+                                                              context)
+                                                          .videos[id + 1],
+                                                      id: id + 1);
                                                 },
                                               ),
                                             );
@@ -237,7 +237,9 @@ class _VideoScreenState extends State<VideoScreen> {
                                       onPressed: () async {
                                         await SystemChrome
                                             .setEnabledSystemUIMode(
-                                                SystemUiMode.manual, overlays: SystemUiOverlay.values);
+                                                SystemUiMode.manual,
+                                                overlays:
+                                                    SystemUiOverlay.values);
 
                                         Navigator.pop(context);
                                       },
@@ -262,7 +264,9 @@ class _VideoScreenState extends State<VideoScreen> {
                                       splashRadius: 20,
                                       onPressed: () async {
                                         cubit.shareOneFile(
-                                            path: file.path, toWhatsapp: true, context: context);
+                                            path: file.path,
+                                            toWhatsapp: true,
+                                            context: context);
                                       },
                                       icon: const Icon(
                                         CupertinoIcons.reply,

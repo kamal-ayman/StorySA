@@ -220,14 +220,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     replyFun: () {
                       cubit.shareFiles(
                         context: context,
-                        type: _tabController.index==0?FileType.Photos:FileType.Videos,
+                        type: _tabController.index == 0
+                            ? FileType.Photos
+                            : FileType.Videos,
                         shareToWhatsApp: true,
                       );
-                      // askDialogRepost(context: context, cubit: cubit, type: _tabController.index==0?FileType.Photos:FileType.Videos);
-                      // share(cubit, true);
                     },
                     shareFun: () {
-                      share(isToWhatsApp: false, cubit: cubit,index: _tabController.index, context: context);
+                      share(
+                          isToWhatsApp: false,
+                          cubit: cubit,
+                          index: _tabController.index,
+                          context: context);
                     },
                     downloadFun: () {
                       cubit.index == 0

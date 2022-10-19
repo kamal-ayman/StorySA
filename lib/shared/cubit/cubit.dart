@@ -356,9 +356,14 @@ class StoryCubit extends Cubit<StoryStates> {
       isBusinessWhatsappInstalled = false;
     });
   }
+
   String shareOneFilePath = '';
 
-  Future shareOneFile({String? path, required bool toWhatsapp, WhatsappType? whatsappType, context}) async {
+  Future shareOneFile(
+      {String? path,
+      required bool toWhatsapp,
+      WhatsappType? whatsappType,
+      context}) async {
     if (!toWhatsapp) {
       await Share.shareFiles([path!]);
       return;
@@ -387,7 +392,7 @@ class StoryCubit extends Cubit<StoryStates> {
     } else {
       await WhatsappShare.shareFile(
         package:
-        isWhatsappInstalled ? Package.whatsapp : Package.businessWhatsapp,
+            isWhatsappInstalled ? Package.whatsapp : Package.businessWhatsapp,
         phone: '+',
         filePath: shareFilesPath,
       );
@@ -402,7 +407,6 @@ class StoryCubit extends Cubit<StoryStates> {
     required BuildContext context,
     WhatsappType? whatsappType,
   }) async {
-
     if (whatsappType != null) {
       await WhatsappShare.shareFile(
         package: whatsappType == WhatsappType.Whatsapp
@@ -438,7 +442,8 @@ class StoryCubit extends Cubit<StoryStates> {
       if (isWhatsappInstalled && isBusinessWhatsappInstalled) {
         askDialogRepost(
           context: context,
-          type: type, shareOneFile: false,
+          type: type,
+          shareOneFile: false,
         );
       } else {
         await WhatsappShare.shareFile(

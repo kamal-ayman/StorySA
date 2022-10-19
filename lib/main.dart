@@ -28,15 +28,14 @@ class StoryApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (BuildContext context) => StoryCubit()..getStoragePermission()..checkInstalledWhatsApp(),
+      create: (BuildContext context) => StoryCubit()
+        ..getStoragePermission()
+        ..checkInstalledWhatsApp(),
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'StorySA',
         home: const SplashScreen(),
-        // home: HomeScreen(),
-        // themeMode: isDark?ThemeMode.dark:ThemeMode.light,
         theme: ThemeData(
-          // scaffoldBackgroundColor: isDark ? const Color(0xff0f1c1e) : Colors.white,
           splashColor: Colors.transparent,
           appBarTheme: AppBarTheme(
             systemOverlayStyle: SystemUiOverlayStyle(
@@ -45,25 +44,6 @@ class StoryApp extends StatelessWidget {
             ),
           ),
         ),
-        //     // elevation: 0.0,
-        //     // titleTextStyle: TextStyle(
-        //     //   color: Colors.black,
-        //     //   fontWeight: FontWeight.bold,
-        //     //   fontSize: 20,
-        //     // ),
-        //     // actionsIconTheme: IconThemeData(color: Colors.black),
-        //   ),
-        // ),
-        // darkTheme: ThemeData(
-        //   appBarTheme: AppBarTheme(
-        //     backgroundColor: Color(0xff1e2d31),
-        //     foregroundColor: Colors.white,
-        //     systemOverlayStyle: SystemUiOverlayStyle(
-        //       statusBarColor: Colors.white.withOpacity(0),
-        //       statusBarIconBrightness: Brightness.light,
-        //     ),
-        //   ),
-        // ),
       ),
     );
   }

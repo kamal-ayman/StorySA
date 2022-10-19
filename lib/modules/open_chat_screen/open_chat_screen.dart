@@ -8,7 +8,6 @@ import 'package:whatsapp_story/shared/cubit/states.dart';
 import '../../shared/components/components.dart';
 import '../../shared/components/constants.dart';
 
-
 class OpenChatScreen extends StatefulWidget {
   OpenChatScreen({Key? key}) : super(key: key);
 
@@ -23,14 +22,13 @@ class _OpenChatScreenState extends State<OpenChatScreen> {
   final GetAdClass _getAdClass0 = GetAdClass();
 
   var textController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
     _getAdClass.getAd(context);
     _getAdClass0.getAd(context);
   }
-
-
 
   @override
   void dispose() {
@@ -41,15 +39,13 @@ class _OpenChatScreenState extends State<OpenChatScreen> {
     _getAdClass.interstitialAd!.dispose();
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<StoryCubit, StoryStates>(
       listener: (context, state) {},
       builder: (context, state) {
         var cubit = StoryCubit.get(context);
-        textController.text = cubit.message??'';
+        textController.text = cubit.message ?? '';
         return Scaffold(
           backgroundColor: isDark ? const Color(0xff0f1c1e) : Colors.white,
           appBar: CustomAppBar(context, 'Open Chat'),
@@ -70,7 +66,9 @@ class _OpenChatScreenState extends State<OpenChatScreen> {
                           child: AdWidget(ad: _getAdClass0.bannerAd!),
                         ),
                       ),
-                    const SizedBox(height: 20,),
+                    const SizedBox(
+                      height: 20,
+                    ),
                     Text(
                       'Now you can open chats without saved any contact in your phone.',
                       style: TextStyle(
@@ -106,14 +104,11 @@ class _OpenChatScreenState extends State<OpenChatScreen> {
                         cubit.phoneNumber = phone.completeNumber;
                       },
                       onCountryChanged: (Country country) {
-                        cubit.defaultCountry(
-                            defaultCountryCode: country.code);
+                        cubit.defaultCountry(defaultCountryCode: country.code);
                       },
                       textInputAction: TextInputAction.next,
                     ),
-                    const SizedBox(
-                      height: 10
-                    ),
+                    const SizedBox(height: 10),
                     TextFormField(
                       controller: textController,
                       textInputAction: TextInputAction.go,
@@ -167,7 +162,9 @@ class _OpenChatScreenState extends State<OpenChatScreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 10,),
+                    const SizedBox(
+                      height: 10,
+                    ),
                     if (_getAdClass.bannerAd != null)
                       Align(
                         alignment: Alignment.bottomCenter,
@@ -177,8 +174,6 @@ class _OpenChatScreenState extends State<OpenChatScreen> {
                           child: AdWidget(ad: _getAdClass.bannerAd!),
                         ),
                       ),
-
-
                   ],
                 ),
               ),
