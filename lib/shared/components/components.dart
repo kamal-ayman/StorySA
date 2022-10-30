@@ -262,9 +262,10 @@ Widget FabShareButton({
   required replyFun,
   required shareFun,
   required downloadFun,
+  required double bottom,
 }) {
   return Padding(
-    padding: const EdgeInsets.only(bottom: 30, right: 20),
+    padding: EdgeInsets.only(bottom: bottom + 10.0, right: 20),
     child: SpeedDial(
       // useRotationAnimation: true,
       overlayOpacity: 0,

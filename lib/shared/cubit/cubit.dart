@@ -153,7 +153,7 @@ class StoryCubit extends Cubit<StoryStates> {
     }).catchError((e) {
       print(e.toString());
     });
-    emit(UpdateThumbnailState());
+    // emit(UpdateThumbnailState());
     // sort images by date
     File file;
     for (int i = 0; i < photos.length; i++) {
@@ -191,7 +191,7 @@ class StoryCubit extends Cubit<StoryStates> {
     emit(AppSuccessState());
   }
 
-  getVideoThumbnail() async {
+  getVideoThumbnail()  {
     var pathThump =
         '/storage/emulated/0/StorySA/.thumbs${normalWhatsApp ? 'WhatsApp' : 'WhatsApp Business'}';
     for (int i = 0; i < videos.length; i++) {
@@ -205,7 +205,7 @@ class StoryCubit extends Cubit<StoryStates> {
         // ]);
         videoThumbs[i] = {i: File(testPath)};
       } else {
-        await VideoThumbnail.thumbnailFile(
+        VideoThumbnail.thumbnailFile(
           video: videos[i].path,
           imageFormat: ImageFormat.PNG,
           thumbnailPath: pathThump,
@@ -215,6 +215,7 @@ class StoryCubit extends Cubit<StoryStates> {
           //   {i: File(testPath)}
           // ]);
           // videoThumbs.add({i: File(value!)});
+          emit(UpdateThumbnailState());
         });
       }
       emit(UpdateThumbnailState());

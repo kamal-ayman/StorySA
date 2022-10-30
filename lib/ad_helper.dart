@@ -1,7 +1,7 @@
 import 'dart:io';
+const bool testMode = false;
 
 class AdHelper {
-  static const testMode = true;
 
   static String get bannerAdUnitId {
     if (testMode) {

@@ -212,9 +212,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
                 Padding(
                   padding:
-                      const EdgeInsets.symmetric(vertical: 25, horizontal: 0),
+                      EdgeInsets.symmetric(vertical: 0, horizontal: 0),
                   child: FabShareButton(
-                    cubit: cubit,
+                    bottom: _getAdClass.bannerAd != null?_getAdClass.bannerAd!.size.height.toDouble():0.0,                    cubit: cubit,
                     visible: cubit.selectedPhotosNow.isNotEmpty ||
                         cubit.selectedVideosNow.isNotEmpty,
                     replyFun: () {

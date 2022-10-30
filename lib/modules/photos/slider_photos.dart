@@ -89,8 +89,9 @@ class _PhotosSliderState extends State<PhotosSlider> {
                   },
                 ),
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 25, horizontal: 0),
+                  padding: EdgeInsets.symmetric(vertical: 0, horizontal: 0),
                   child: FabShareButton(
+                    bottom: _getAdClass.bannerAd != null?_getAdClass.bannerAd!.size.height.toDouble():0.0,
                     cubit: cubit,
                     visible: true,
                     replyFun: () {
