@@ -22,27 +22,26 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
-
     Future<void> _pickDirectory(BuildContext context) async {
-      Directory? directory = Directory(saveFolder);
-      if (directory == null) {
-        directory = Directory(FolderPicker.rootPath);
-      }
+      Directory directory = Directory(saveFolder);
+      // directory ??= Directory(FolderPicker.rootPath);
+      print(directory.path);
 
       Directory? newDirectory = await FolderPicker.pick(
-          allowFolderCreation: true,
-          context: context,
-          rootDirectory: directory,
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(10))));
+        allowFolderCreation: true,
+        context: context,
+        rootDirectory: directory,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(10),
+          ),
+        ),
+      );
       setState(() {
         saveFolder = newDirectory!.path;
         CacheHelper.saveData(key: 'saveFolder', value: saveFolder);
-
-        print(saveFolder);
       });
     }
-
 
     return BlocConsumer<StoryCubit, StoryStates>(
       listener: (context, state) {},
@@ -104,14 +103,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
                 const SizedBox(height: 15),
                 buildCustomTextButton(
-                  onPressed: () {
-                    cubit.checkPermissions(context);
+                  onPressed: () async{
+                    await cubit.checkPermissions(context);
                     _pickDirectory(context);
+                    // cubit.checkPermissions(context).then((value) {
+                    //
+                    // });
                   },
                   child: Row(
                     children: [
                       Text(
-                        'Selected Path: ',
+                        'Save Path: ',
                         style: TextStyle(
                             fontSize: 16,
                             color: isDark ? Colors.white : Colors.grey[800]),
@@ -135,7 +137,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     buildCustomTextButton(
                       onPressed: () {
                         setState(() {
-                          saveFolder = '/storage/emulated/0/StorySA';
+                          saveFolder = '/storage/emulated/0/StorySA/Status';
                         });
                         CacheHelper.saveData(
                             key: 'saveFolder', value: saveFolder);
@@ -143,7 +145,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           text: 'Reset Successfully',
                           state: ToastStates.SUCCESS,
                         );
-
                       },
                       child: Text(
                         'Reset to default path',

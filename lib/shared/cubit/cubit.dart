@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,6 +14,7 @@ import 'package:whatsapp_story/shared/components/components.dart';
 import 'package:whatsapp_story/shared/components/constants.dart';
 import 'package:whatsapp_story/shared/cubit/states.dart';
 import '../../modules/photos/photos_screen.dart';
+import '../../modules/saved_screen/saved_screen.dart';
 import '../../modules/videos/videos_screen.dart';
 import '../network/local/cache_helper.dart';
 
@@ -41,6 +44,7 @@ class StoryCubit extends Cubit<StoryStates> {
   List<Widget> widgets = const [
     PhotosScreen(),
     VideosScreen(),
+    SavedScreen(),
   ];
 
   Future getStoragePermission() async {
@@ -80,15 +84,21 @@ class StoryCubit extends Cubit<StoryStates> {
     emit(ChangePathStatusesState());
   }
 
-  checkPermissions(context) async {
+
+  Future checkPermissions(context) async {
+    await Directory(saveFolder).create(recursive: true);
     var status = await Permission.manageExternalStorage.status;
-    if (status.isRestricted) {
+    print("loading status");
+    if (status.isGranted) {
+      print("status is Granted");
+    }
+    else if (status.isRestricted) {
       status = await Permission.manageExternalStorage.request();
     }
-    if (status.isDenied) {
+    else if (status.isDenied) {
       status = await Permission.manageExternalStorage.request();
     }
-    if (status.isPermanentlyDenied) {
+    else if (status.isPermanentlyDenied) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content:
@@ -191,35 +201,45 @@ class StoryCubit extends Cubit<StoryStates> {
     emit(AppSuccessState());
   }
 
-  getVideoThumbnail()  {
+  getVideoThumbnail() async{
     var pathThump =
         '/storage/emulated/0/StorySA/.thumbs${normalWhatsApp ? 'WhatsApp' : 'WhatsApp Business'}';
     for (int i = 0; i < videos.length; i++) {
       String testPath = pathThump +
           '/' +
           videos[i].path.split('/').last.split('.').first +
-          '.png';
+          '.jpg';
       if (File(testPath).existsSync()) {
         // videoThumbs.replaceRange(i, i+1,[
         //   {i: File(testPath)}
         // ]);
+        print('founded');
         videoThumbs[i] = {i: File(testPath)};
+        emit(UpdateThumbnailState());
       } else {
-        VideoThumbnail.thumbnailFile(
-          video: videos[i].path,
-          imageFormat: ImageFormat.PNG,
-          thumbnailPath: pathThump,
-        ).then((value) {
-          videoThumbs[i] = {i: File(testPath)};
-          // videoThumbs.replaceRange(i, i,[
-          //   {i: File(testPath)}
-          // ]);
-          // videoThumbs.add({i: File(value!)});
-          emit(UpdateThumbnailState());
-        });
+        print('start');
+        try {
+          await VideoThumbnail.thumbnailFile(
+            imageFormat: ImageFormat.JPEG,
+            video: videos[i].path,
+            thumbnailPath: pathThump,
+            maxHeight: 256,
+            quality: 100,
+          ).then((value) {
+            print('value:');
+            print(value);
+            videoThumbs[i] = {i: File(testPath)};
+            emit(UpdateThumbnailState());
+          }).catchError((e) {
+            print('erorr0: $e');
+          });
+        } catch (e) {
+          print('error');
+          print(e.toString());
+        }
       }
-      emit(UpdateThumbnailState());
     }
+
   }
 
   selectedPhoto(int id) {
@@ -331,14 +351,13 @@ class StoryCubit extends Cubit<StoryStates> {
   }
 
   saveStory(File file) async {
-    try {
-      file.copy(saveFolder + '/' + file.path.split('/').last);
-
+    String newFile = saveFolder + '/' + file.path.split('/').last;
+    file.copy(newFile).then((value) {
       toastShow(text: 'Story Saved Successfully', state: ToastStates.SUCCESS);
       emit(AppSaveSuccessState());
-    } on Exception catch (e) {
+    }).catchError((e){
       emit(AppSaveErrorState());
-    }
+    });
   }
 
   late bool isWhatsappInstalled;

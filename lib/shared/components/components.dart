@@ -183,7 +183,7 @@ Widget buildItem({
   );
 }
 
-enum ItemState { Video, Image }
+enum ItemState { Video, Image, Saved }
 
 Widget buildAllItems(
     double width, BuildContext context, StoryCubit cubit, ItemState state) {
