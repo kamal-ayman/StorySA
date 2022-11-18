@@ -449,6 +449,7 @@ Future<void> aboutUsDialog({
 
 Future<void> askDialogRepost({
   required context,
+  required path,
   required shareOneFile,
   required type,
 }) async {
@@ -467,6 +468,7 @@ Future<void> askDialogRepost({
           child: ListBody(
             children: [
               defaultSelectButton(
+                path: path,
                 context: context,
                 title: 'WhatsApp',
                 id: 0,
@@ -475,6 +477,7 @@ Future<void> askDialogRepost({
               ),
               const SizedBox(height: 8),
               defaultSelectButton(
+                path: path,
                 context: context,
                 title: 'Business WhatsApp',
                 id: 1,
@@ -507,6 +510,7 @@ Future<void> askDialogRepost({
 }
 
 Widget defaultSelectButton({
+  required path,
   required BuildContext context,
   required String title,
   required int id,
@@ -522,13 +526,15 @@ Widget defaultSelectButton({
         Navigator.pop(context);
         if (shareOneFile) {
           StoryCubit.get(context).shareOneFile(
-            context: context,path: '',
+            context: context,
+            path: path,
             toWhatsapp: true,
             whatsappType:
                 id == 0 ? WhatsappType.Whatsapp : WhatsappType.BusinessWhatsapp,
           );
         } else {
           StoryCubit.get(context).shareFiles(
+            shareFilesPathLocal: path,
             type: type,
             context: context,
             shareToWhatsApp: true,

@@ -70,7 +70,7 @@ class _OpenChatScreenState extends State<OpenChatScreen> {
                       height: 20,
                     ),
                     Text(
-                      'Now you can open chats without saved any contact in your phone.',
+                      'Now you can open chats without saved any contact in your phone.${cubit.defaultCountry()!=null?'\nDon\'t type 0':''}',
                       style: TextStyle(
                         color: textColor,
                       ),

@@ -70,15 +70,20 @@ class SplashScreen extends StatelessWidget {
       return size;
     }
 
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      statusBarColor: Color(0x00000000),
+    SystemChrome.setSystemUIOverlayStyle( SystemUiOverlayStyle(
+      statusBarColor: isDark
+          ? const Color(0xff1e2d31)
+          : const Color(0xff008066),
       statusBarIconBrightness: Brightness.light,
     ));
     return Scaffold(
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        color: Colors.white,
+        // color: Colors.white,
+        color: isDark
+            ? const Color(0xff1e2d31)
+            : Colors.white,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -96,7 +101,9 @@ class SplashScreen extends StatelessWidget {
             Text(
               'from',
               style: Theme.of(context).textTheme.caption!.copyWith(
-                    color: const Color(0xff626a6d),
+                    color: isDark
+                        ? Colors.white
+                        : const Color(0xff626a6d),
                     fontSize: 14,
                   ),
             ),

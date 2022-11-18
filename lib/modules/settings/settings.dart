@@ -23,6 +23,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     Future<void> _pickDirectory(BuildContext context) async {
+      await Directory(saveFolder).create(recursive: true);
       Directory directory = Directory(saveFolder);
       // directory ??= Directory(FolderPicker.rootPath);
       print(directory.path);
@@ -104,11 +105,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 const SizedBox(height: 15),
                 buildCustomTextButton(
                   onPressed: () async{
-                    await cubit.checkPermissions(context);
                     _pickDirectory(context);
-                    // cubit.checkPermissions(context).then((value) {
-                    //
-                    // });
                   },
                   child: Row(
                     children: [
@@ -135,10 +132,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     buildCustomTextButton(
-                      onPressed: () {
+                      onPressed: () async{
+                        await Directory(saveFolder).create(recursive: true);
                         setState(() {
                           saveFolder = '/storage/emulated/0/StorySA/Status';
                         });
+
                         CacheHelper.saveData(
                             key: 'saveFolder', value: saveFolder);
                         toastShow(

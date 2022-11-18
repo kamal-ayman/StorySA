@@ -86,10 +86,11 @@ class StoryCubit extends Cubit<StoryStates> {
 
 
   Future checkPermissions(context) async {
-    await Directory(saveFolder).create(recursive: true);
+
     var status = await Permission.manageExternalStorage.status;
     print("loading status");
     if (status.isGranted) {
+      await Directory(saveFolder).create(recursive: true);
       print("status is Granted");
     }
     else if (status.isRestricted) {
@@ -328,7 +329,8 @@ class StoryCubit extends Cubit<StoryStates> {
     }
   }
 
-  saveSelectPhotoStory() {
+  saveSelectPhotoStory() async {
+    await Directory(saveFolder).create(recursive: true);
     selectedPhotosNow.forEach((key, value) {
       photos[key].copy(saveFolder + '/' + photos[key].path.split('/').last);
     });
@@ -339,7 +341,8 @@ class StoryCubit extends Cubit<StoryStates> {
     );
   }
 
-  saveSelectVideoStory() {
+  saveSelectVideoStory() async {
+    await Directory(saveFolder).create(recursive: true);
     selectedVideosNow.forEach((key, value) {
       videos[key].copy(saveFolder + '/' + videos[key].path.split('/').last);
     });
@@ -351,6 +354,7 @@ class StoryCubit extends Cubit<StoryStates> {
   }
 
   saveStory(File file) async {
+    await Directory(saveFolder).create(recursive: true);
     String newFile = saveFolder + '/' + file.path.split('/').last;
     file.copy(newFile).then((value) {
       toastShow(text: 'Story Saved Successfully', state: ToastStates.SUCCESS);
@@ -365,19 +369,20 @@ class StoryCubit extends Cubit<StoryStates> {
 
   Future checkInstalledWhatsApp() async {
     await WhatsappShare.isInstalled(package: Package.whatsapp).then((value) {
-      isWhatsappInstalled = true;
+      isWhatsappInstalled = value!;
     }).catchError((e) {
       isWhatsappInstalled = false;
     });
     await WhatsappShare.isInstalled(package: Package.businessWhatsapp)
         .then((value) {
-      isBusinessWhatsappInstalled = true;
+      isBusinessWhatsappInstalled = value!;
     }).catchError((e) {
       isBusinessWhatsappInstalled = false;
     });
+    // print('isWhatsappInstalled' + isWhatsappInstalled.toString());
+    // print('isWhatsappInstalled1111' + isBusinessWhatsappInstalled.toString());
   }
 
-  String shareOneFilePath = '';
 
   Future shareOneFile(
       {String? path,
@@ -394,27 +399,27 @@ class StoryCubit extends Cubit<StoryStates> {
             ? Package.whatsapp
             : Package.businessWhatsapp,
         phone: '+',
-        filePath: [shareOneFilePath],
+        filePath: [path!],
       ).then((value) {
         whatsappType = null;
-        shareOneFilePath = '';
       });
       return;
     }
-    shareOneFilePath = path!;
     await checkInstalledWhatsApp();
     if (isWhatsappInstalled && isBusinessWhatsappInstalled) {
       askDialogRepost(
+        path: path!,
         type: FileType.Photos,
         context: context,
         shareOneFile: true,
+
       );
     } else {
       await WhatsappShare.shareFile(
         package:
             isWhatsappInstalled ? Package.whatsapp : Package.businessWhatsapp,
         phone: '+',
-        filePath: shareFilesPath,
+        filePath: [path!],
       );
     }
   }
@@ -426,7 +431,10 @@ class StoryCubit extends Cubit<StoryStates> {
     bool shareToWhatsApp = false,
     required BuildContext context,
     WhatsappType? whatsappType,
+    List<String>? shareFilesPathLocal,
   }) async {
+    shareFilesPathLocal == null?shareFilesPath.clear(): shareFilesPath = shareFilesPathLocal;
+    // shareFilesPath.clear();
     if (whatsappType != null) {
       await WhatsappShare.shareFile(
         package: whatsappType == WhatsappType.Whatsapp
@@ -461,6 +469,7 @@ class StoryCubit extends Cubit<StoryStates> {
       }
       if (isWhatsappInstalled && isBusinessWhatsappInstalled) {
         askDialogRepost(
+          path: shareFilesPath,
           context: context,
           type: type,
           shareOneFile: false,
