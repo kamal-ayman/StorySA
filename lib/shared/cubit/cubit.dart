@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -44,7 +45,7 @@ class StoryCubit extends Cubit<StoryStates> {
   List<Widget> widgets = const [
     PhotosScreen(),
     VideosScreen(),
-    SavedScreen(),
+    // SavedScreen(),
   ];
 
   Future getStoragePermission() async {
@@ -541,6 +542,12 @@ class StoryCubit extends Cubit<StoryStates> {
       last = id;
       emit(SelectButtonDialogState());
     }
+  }
+
+  getInfo() async {
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    print('Running on ${androidInfo.toMap()}');
   }
 }
 

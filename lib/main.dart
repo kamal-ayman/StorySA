@@ -7,7 +7,10 @@ import 'package:whatsapp_story/layout/layout.dart';
 import 'package:whatsapp_story/shared/bloc_observer.dart';
 import 'package:whatsapp_story/shared/components/constants.dart';
 import 'package:whatsapp_story/shared/cubit/cubit.dart';
+import 'package:whatsapp_story/shared/cubit/states.dart';
 import 'package:whatsapp_story/shared/network/local/cache_helper.dart';
+
+import 'modules/splash_screen/splash_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,99 +32,27 @@ class StoryApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (BuildContext context) => StoryCubit()
-        ..getStoragePermission()..checkPermissions(context)
-        ..checkInstalledWhatsApp(),
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'StorySA',
-        home: const SplashScreen(),
-        theme: ThemeData(
-          splashColor: Colors.transparent,
-          appBarTheme: AppBarTheme(
-            systemOverlayStyle: SystemUiOverlayStyle(
-              statusBarColor: Colors.white.withOpacity(0),
-              statusBarIconBrightness: Brightness.light,
+        ..getStoragePermission()
+        ..checkPermissions(context)
+        ..checkInstalledWhatsApp()..getInfo(),
+      child: BlocConsumer<StoryCubit, StoryStates>(
+        listener: (context, state) {},
+        builder: (context, state) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'StorySA',
+            home: const SplashScreen(),
+            theme: ThemeData(
+              splashColor: Colors.transparent,
+              appBarTheme: const AppBarTheme(
+                systemOverlayStyle: SystemUiOverlayStyle(
+                  statusBarColor: Colors.transparent,
+                  statusBarIconBrightness: Brightness.light,
+                ),
+              ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class SplashScreen extends StatelessWidget {
-  const SplashScreen({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    Timer(
-      const Duration(milliseconds: 500),
-      () {
-        Navigator.of(context)
-            .pushReplacement(MaterialPageRoute(builder: (_) => HomeScreen()));
-      },
-    );
-
-    imageSize() {
-      double height = MediaQuery.of(context).size.height;
-      double width = MediaQuery.of(context).size.width;
-      double size = height < width ? height : width;
-      size /= 4;
-      return size;
-    }
-
-    SystemChrome.setSystemUIOverlayStyle( SystemUiOverlayStyle(
-      statusBarColor: isDark
-          ? const Color(0xff1e2d31)
-          : const Color(0xff008066),
-      statusBarIconBrightness: Brightness.light,
-    ));
-    return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        // color: Colors.white,
-        color: isDark
-            ? const Color(0xff1e2d31)
-            : Colors.white,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Spacer(),
-            Image.asset(
-              'assets/icon/icon.png',
-              filterQuality: FilterQuality.low,
-              width: imageSize(),
-              height: imageSize(),
-            ),
-            const SizedBox(
-              height: 40,
-            ),
-            const Spacer(),
-            Text(
-              'from',
-              style: Theme.of(context).textTheme.caption!.copyWith(
-                    color: isDark
-                        ? Colors.white
-                        : const Color(0xff626a6d),
-                    fontSize: 14,
-                  ),
-            ),
-            const SizedBox(
-              height: 5,
-            ),
-            Text(
-              'Oliver',
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyText1!
-                  .copyWith(fontSize: 20, color: const Color(0xff04cc6a)),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

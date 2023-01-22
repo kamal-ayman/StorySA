@@ -97,5 +97,6 @@ flutter {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation 'com.google.android.gms:play-services-ads:21.4.0'
 //    implementation ('com.google.android.exoplayer:exoplayer:2.17.0')
 }
