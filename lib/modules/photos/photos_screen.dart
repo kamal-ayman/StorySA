@@ -7,9 +7,9 @@ import 'package:whatsapp_story/shared/cubit/states.dart';
 import '../../shared/components/components.dart';
 import '../../shared/components/constants.dart';
 
-
 class PhotosScreen extends StatelessWidget {
   const PhotosScreen({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width / 2;
@@ -19,6 +19,7 @@ class PhotosScreen extends StatelessWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Permission Denied'),
+              behavior: SnackBarBehavior.floating,
             ),
           );
         }
@@ -30,11 +31,13 @@ class PhotosScreen extends StatelessWidget {
         }
         return Conditional.single(
           context: context,
-          conditionBuilder: (context) => state is! AppLoadingState,
-          fallbackBuilder: (context) =>SliverFillRemaining(
+          conditionBuilder: (context) => state is! AppStatusLoadingState,
+          fallbackBuilder: (context) => SliverFillRemaining(
             child: Center(
               child: CircularProgressIndicator(
-                color: isDark?Colors.white.withOpacity(.4): Color(0xff008066),
+                color: isDark
+                    ? Colors.white.withOpacity(.4)
+                    : const Color(0xff008066),
               ),
             ),
           ),
@@ -49,4 +52,3 @@ class PhotosScreen extends StatelessWidget {
     );
   }
 }
-

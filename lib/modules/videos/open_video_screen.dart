@@ -8,19 +8,21 @@ import 'package:whatsapp_story/shared/cubit/cubit.dart';
 import '../../shared/cubit/states.dart';
 
 class VideoScreen extends StatefulWidget {
-  late File file;
-  late int id;
+  final File file;
+  final int id;
 
-  VideoScreen({Key? key, required this.file, required this.id})
+  const VideoScreen({Key? key, required this.file, required this.id})
       : super(key: key);
 
   @override
-  State<VideoScreen> createState() => _VideoScreenState(file: file, id: id);
+  State<VideoScreen> createState() => _VideoScreenState(id: id, file: file);
 }
 
 class _VideoScreenState extends State<VideoScreen> {
-  late File file;
-  late int id;
+  File file;
+  int id;
+  bool canPlay = true;
+  bool isPlaying = true;
   late VideoPlayerController controller;
 
   _VideoScreenState({required this.file, required this.id});
@@ -28,15 +30,25 @@ class _VideoScreenState extends State<VideoScreen> {
   @override
   void initState() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
-
-    super.initState();
     controller = VideoPlayerController.file(file);
     controller.addListener(() {
-      setState(() {});
+
     });
     controller.setLooping(false);
     controller.initialize().then((_) => setState(() {}));
     controller.play();
+    super.initState();
+  }
+
+  Future<void> playVideo(int id) async {
+    controller.removeListener(() { });
+    file = StoryCubit.get(context).videos[id]!.file;
+    controller = VideoPlayerController.file(file);
+    controller.addListener(() {
+    });
+    controller.setLooping(false);
+    await controller.initialize().then((_) => setState(() {}));
+    await controller.play();
   }
 
   @override
@@ -111,19 +123,14 @@ class _VideoScreenState extends State<VideoScreen> {
                                         splashColor: Colors.transparent,
                                         splashRadius: 20,
                                         padding: EdgeInsets.zero,
-                                        onPressed: () {
+                                        onPressed: () async {
                                           if (back) {
-                                            Navigator.pushReplacement(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    VideoScreen(
-                                                        file: StoryCubit.get(
-                                                                context)
-                                                            .videos[id - 1],
-                                                        id: id - 1),
-                                              ),
-                                            );
+                                            if (canPlay) {
+                                              canPlay = false;
+                                              playVideo(--id).then((value) {
+                                                canPlay = true;
+                                              });
+                                            }
                                           } else {
                                             print('no more video!!');
                                           }
@@ -160,18 +167,12 @@ class _VideoScreenState extends State<VideoScreen> {
                                       IconButton(
                                         onPressed: () {
                                           if (next) {
-                                            Navigator.pushReplacement(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) {
-                                                  return VideoScreen(
-                                                      file: StoryCubit.get(
-                                                              context)
-                                                          .videos[id + 1],
-                                                      id: id + 1);
-                                                },
-                                              ),
-                                            );
+                                            if (canPlay) {
+                                              canPlay = false;
+                                              playVideo(++id).then((value) {
+                                                canPlay = true;
+                                              });
+                                            }
                                           } else {
                                             print('no more video!!');
                                           }
@@ -195,7 +196,7 @@ class _VideoScreenState extends State<VideoScreen> {
                                         padding: EdgeInsets.zero,
                                         onPressed: () {
                                           StoryCubit.get(context)
-                                              .saveStory(file);
+                                              .saveCurrentStory(file);
                                         },
                                         icon: const Icon(CupertinoIcons
                                             .square_arrow_down_on_square),

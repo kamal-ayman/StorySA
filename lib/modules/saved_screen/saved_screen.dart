@@ -30,15 +30,16 @@ class SavedScreen extends StatelessWidget {
         }
         return Conditional.single(
           context: context,
-          conditionBuilder: (context) => state is! AppLoadingState,
+          conditionBuilder: (context) => state is! AppDownloadLoadingState,
           fallbackBuilder: (context) => SliverFillRemaining(
             child: Center(
               child: CircularProgressIndicator(
-                color: isDark?Colors.white.withOpacity(.4): Color(0xff008066),
+                color: isDark?Colors.white.withOpacity(.4): const Color(0xff008066),
               ),
             ),
           ),
           widgetBuilder: (context) {
+
             if (cubit.videos.isEmpty) {
               return noStoryShow();
             }

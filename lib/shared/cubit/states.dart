@@ -4,17 +4,20 @@ class AppInitialState extends StoryStates {}
 
 class ChangeIndexState extends StoryStates {}
 
-class AppLoadingState extends StoryStates {}
+class AppStatusLoadingState extends StoryStates {}
 
-class AppSuccessState extends StoryStates {}
+class AppStatusSuccessState extends StoryStates {}
 
 class PermissionDeniedState extends StoryStates {}
 
 class SelectAllState extends StoryStates {}
+class SelectItemState extends StoryStates {}
+class UnSelectItemState extends StoryStates {}
 
 class SelectPhotoState extends StoryStates {}
 
 class UnSelectPhotoState extends StoryStates {}
+class UnSelectAllState extends StoryStates {}
 
 class SelectVideoState extends StoryStates {}
 
@@ -35,3 +38,6 @@ class GetAdState extends StoryStates {}
 class ChangePathStatusesState extends StoryStates {}
 
 class SelectButtonDialogState extends StoryStates {}
+class AppDownloadLoadingState extends StoryStates {}
+class AppDownloadSuccessState extends StoryStates {}
+class AppDownloadErrorState extends StoryStates {}

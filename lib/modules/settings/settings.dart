@@ -1,11 +1,9 @@
 import 'dart:io';
 
 import 'package:easy_folder_picker/FolderPicker.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_switch/flutter_switch.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:whatsapp_story/shared/cubit/cubit.dart';
 import 'package:whatsapp_story/shared/cubit/states.dart';
 import 'package:whatsapp_story/shared/network/local/cache_helper.dart';
@@ -50,7 +48,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         var cubit = StoryCubit.get(context);
         return Scaffold(
           backgroundColor: isDark ? const Color(0xff0f1c1e) : Colors.white,
-          appBar: CustomAppBar(context, 'Settings'),
+          appBar: customAppBar(context, 'Settings'),
           body: Padding(
             padding: const EdgeInsets.all(15.0),
             child: Column(

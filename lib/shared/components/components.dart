@@ -45,43 +45,38 @@ chooseToastColor(ToastStates state) {
 int adcount = 0;
 
 Widget buildItem({
-  required context,
+  required BuildContext context,
   required StoryCubit cubit,
   required double width,
-  required Map<int, File> e,
+  required int id,
+  required File file,
+  required bool isSelected,
   required ItemState state,
 }) {
-  bool checkSelectedItem = false;
-  if (state == ItemState.Video) {
-    checkSelectedItem = cubit.selectedVideos[e.keys.first]!;
-  } else {
-    checkSelectedItem = cubit.selectedPhotos[e.keys.first]!;
-  }
-
   return InkWell(
     child: Stack(
       children: [
         AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          padding: EdgeInsets.all(checkSelectedItem ? 10 : 0),
+          padding: EdgeInsets.all(isSelected ? 10 : 0),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
-            clipBehavior: checkSelectedItem ? Clip.hardEdge : Clip.none,
+            clipBehavior: isSelected ? Clip.hardEdge : Clip.none,
             width: width,
             height: width + 10,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(
-                checkSelectedItem ? 20 : 0,
+                isSelected ? 20 : 0,
               ),
             ),
-            child: e[e.keys.first]!.path == ''
+            child: file.path == ''
                 ? Container(color: Colors.black)
-                : Image.file(e[e.keys.first]!, fit: BoxFit.cover),
+                : Image.file(file, fit: BoxFit.cover),
           ),
         ),
         AnimatedContainer(
-          transform: Matrix4.rotationZ(checkSelectedItem ? 0 : .1),
-          padding: EdgeInsets.all(checkSelectedItem ? 8 : 0),
+          transform: Matrix4.rotationZ(isSelected ? 0 : .1),
+          padding: EdgeInsets.all(isSelected ? 8 : 0),
           duration: const Duration(milliseconds: 200),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -92,13 +87,13 @@ Widget buildItem({
                   Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(999),
-                      color: checkSelectedItem
+                      color: isSelected
                           ? Colors.white
                           : Colors.white.withOpacity(0),
                     ),
                     child: Icon(
                       Icons.check_circle,
-                      color: checkSelectedItem
+                      color: isSelected
                           ? isDark
                               ? const Color(0xff00a881)
                               : const Color(0xff23d363)
@@ -117,7 +112,7 @@ Widget buildItem({
           Align(
             alignment: Alignment.center,
             child: Container(
-              color: checkSelectedItem
+              color: isSelected
                   ? Colors.blue.withOpacity(0.05)
                   : Colors.blue.withOpacity(0),
               child: const Icon(
@@ -146,26 +141,25 @@ Widget buildItem({
 
       if (state == ItemState.Video) {
         if (cubit.selectMode) {
-          cubit.selectedVideo(e.keys.first);
+          isSelected ? cubit.unSelectItem(id) : cubit.selectItem(id);
         } else {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => VideoScreen(
-                file: cubit.videos[e.keys.first],
-                id: e.keys.first,
+                file: cubit.videos[id]!.file,
+                id: id,
               ),
             ),
           );
         }
       } else {
         if (cubit.selectMode) {
-          cubit.selectedPhoto(e.keys.first);
+          isSelected ? cubit.unSelectItem(id) : cubit.selectItem(id);
         } else {
           Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => PhotosSlider(
-                photos: cubit.photos,
-                id: e.keys.first,
+                id: id,
               ),
             ),
           );
@@ -173,11 +167,7 @@ Widget buildItem({
       }
     },
     onLongPress: () {
-      if (state == ItemState.Video) {
-        cubit.selectedVideo(e.keys.first);
-      } else {
-        cubit.selectedPhoto(e.keys.first);
-      }
+      isSelected ? cubit.unSelectItem(id) : cubit.selectItem(id);
     },
     highlightColor: Colors.transparent,
   );
@@ -187,26 +177,31 @@ enum ItemState { Video, Image, Saved }
 
 Widget buildAllItems(
     double width, BuildContext context, StoryCubit cubit, ItemState state) {
-  return SliverGrid.count(
-    crossAxisCount: 2,
-    mainAxisSpacing: 5.0,
-    crossAxisSpacing: 5.0,
+  return SliverGrid.extent(
+    maxCrossAxisExtent: 240,
+    // crossAxisCount: 2,
+    mainAxisSpacing: 4,
+    crossAxisSpacing: 4,
     childAspectRatio: 1,
     children: state == ItemState.Video
-        ? cubit.videoThumbs.map((e) {
+        ? cubit.videos.keys.map((id) {
             return buildItem(
                 context: context,
                 cubit: cubit,
                 width: width,
-                e: e,
+                id: id,
+                file: cubit.videosThumbs[id],
+                isSelected: cubit.videos[id]!.isSelected,
                 state: state);
           }).toList()
-        : cubit.photosThumbs.map((e) {
+        : cubit.photos.keys.map((id) {
             return buildItem(
                 context: context,
                 cubit: cubit,
                 width: width,
-                e: e,
+                id: id,
+                file: cubit.photos[id]!.file,
+                isSelected: cubit.photos[id]!.isSelected,
                 state: state);
           }).toList(),
   );
@@ -256,7 +251,7 @@ void share(
   }
 }
 
-Widget FabShareButton({
+Widget fabShareButton({
   required bool visible,
   required StoryCubit cubit,
   required replyFun,
@@ -318,7 +313,7 @@ SpeedDialChild customSpeedDial({
           isDark ? const Color(0xff1e2d31) : const Color(0xff22d363));
 }
 
-AppBar CustomAppBar(BuildContext context, String title) {
+AppBar customAppBar(BuildContext context, String title) {
   return AppBar(
     title: Text(title),
     leading: IconButton(
@@ -334,7 +329,7 @@ AppBar CustomAppBar(BuildContext context, String title) {
   );
 }
 
-Widget leadingIcon(StoryCubit cubit, scaffoldKey) {
+Widget leadingIcon(StoryCubit cubit, GlobalKey<ScaffoldState> scaffoldKey) {
   return IconButton(
     visualDensity: VisualDensity.compact,
     splashColor: Colors.transparent,
@@ -358,15 +353,16 @@ Widget leadingIcon(StoryCubit cubit, scaffoldKey) {
                 key: ValueKey('icon1'),
               )),
     onPressed: () {
-      if (cubit.selectMode)
+      if (cubit.selectMode) {
         cubit.disableSelectMode();
-      else
+      } else {
         scaffoldKey.currentState!.openDrawer();
+      }
     },
   );
 }
 
-Widget CustomListTile({
+Widget customListTile({
   required String title,
   required IconData leading,
   required onTap,

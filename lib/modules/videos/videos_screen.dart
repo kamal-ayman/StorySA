@@ -30,11 +30,12 @@ class VideosScreen extends StatelessWidget {
         }
         return Conditional.single(
           context: context,
-          conditionBuilder: (context) => state is! AppLoadingState,
+          conditionBuilder: (context) => state is! AppStatusLoadingState,
           fallbackBuilder: (context) => SliverFillRemaining(
             child: Center(
               child: CircularProgressIndicator(
-                color: isDark?Colors.white.withOpacity(.4): Color(0xff008066),
+                color:
+                    isDark ? Colors.white.withOpacity(.4) : const Color(0xff008066),
               ),
             ),
           ),
@@ -42,7 +43,7 @@ class VideosScreen extends StatelessWidget {
             if (cubit.videos.isEmpty) {
               return noStoryShow();
             }
-            return buildAllItems(width,context,cubit, ItemState.Video);
+            return buildAllItems(width, context, cubit, ItemState.Video);
           },
         );
       },

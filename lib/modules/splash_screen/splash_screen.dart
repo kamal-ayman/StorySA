@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../layout/layout.dart';
-import '../../layout/layout0.dart';
 import '../../shared/components/constants.dart';
 
 class SplashScreen extends StatelessWidget {
@@ -16,7 +15,7 @@ class SplashScreen extends StatelessWidget {
       const Duration(milliseconds: 500),
       () {
         Navigator.of(context)
-            .pushReplacement(MaterialPageRoute(builder: (_) => HomeScreen0()));
+            .pushReplacement(MaterialPageRoute(builder: (_) => const HomeScreen()));
       },
     );
 
@@ -27,11 +26,7 @@ class SplashScreen extends StatelessWidget {
       return size / 4;
     }
 
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor:
-          isDark ? const Color(0xff1e2d31) : const Color(0xff008066),
-      statusBarIconBrightness: Brightness.light,
-    ));
+
     return Scaffold(
       body: Container(
         width: double.infinity,
