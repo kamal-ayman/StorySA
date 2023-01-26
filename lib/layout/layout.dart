@@ -129,7 +129,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               child: Text(
                                   '${_tabController.index == 0 ? cubit.selectedPhotosID.length : cubit.selectedVideosID.length}',
                                   style:
-                                      Theme.of(context).textTheme.titleLarge)),
+                                      Theme.of(context).textTheme.titleLarge!.copyWith(
+                                        color: Colors.white
+                                      ))),
                         if (cubit.selectMode)
                           Row(
                             children: [

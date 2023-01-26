@@ -4,18 +4,10 @@ import 'package:flutter/services.dart';
 import 'colors.dart';
 
 ThemeData lightTheme = ThemeData(
-  
+
   // splashColor: Colors.transparent,
   highlightColor: Colors.transparent,
   splashFactory: NoSplash.splashFactory,
-  textTheme: const TextTheme(
-    titleSmall: TextStyle(),
-    titleLarge: TextStyle(),
-  ).apply(
-    displayColor: Colors.white,
-    bodyColor: Colors.white,
-    decorationColor: Colors.white,
-  ),
   primaryIconTheme: IconThemeData(
     color: Colors.white,
   ),
