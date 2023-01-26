@@ -1,9 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'colors.dart';
+
 ThemeData lightTheme = ThemeData(
+  
   // splashColor: Colors.transparent,
   highlightColor: Colors.transparent,
+  splashFactory: NoSplash.splashFactory,
+  textTheme: const TextTheme(
+    titleSmall: TextStyle(),
+    titleLarge: TextStyle(),
+  ).apply(
+    displayColor: Colors.white,
+    bodyColor: Colors.white,
+    decorationColor: Colors.white,
+  ),
+  primaryIconTheme: IconThemeData(
+    color: Colors.white,
+  ),
   appBarTheme: const AppBarTheme(
     foregroundColor: Colors.white,
     backgroundColor: Color(0xff008066),
@@ -19,18 +34,30 @@ ThemeData lightTheme = ThemeData(
 ThemeData darkTheme = ThemeData(
   // splashColor: Colors.transparent,
   // splashFactory: ,
+  splashFactory: NoSplash.splashFactory,
+  primaryIconTheme: IconThemeData(
+    color: Colors.white,
+  ),
+  textTheme: const TextTheme(
+    titleSmall: TextStyle(),
+    titleLarge: TextStyle(),
+  ).apply(
+    displayColor: Colors.white,
+    bodyColor: Colors.white,
+    decorationColor: Colors.white,
+  ),
+  accentColor: Colors.green,
+  primarySwatch: Colors.green,
   appBarTheme: const AppBarTheme(
-iconTheme: IconThemeData(
-  color: Colors.white70
-),
+    iconTheme: IconThemeData(color: Colors.white70),
     systemOverlayStyle: SystemUiOverlayStyle(
-      systemNavigationBarColor: Color(0xff1e2d31),
-      systemNavigationBarDividerColor: Color(0xff1e2d31),
+      systemNavigationBarColor: darkColorDarkTheme,
+      systemNavigationBarDividerColor: darkColorDarkTheme,
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.light,
     ),
-    foregroundColor: Color(0xff83979d),
-    backgroundColor: Color(0xff1e2d31),
+    foregroundColor: lightColorDarkTheme,
+    backgroundColor: darkColorDarkTheme,
   ),
   scaffoldBackgroundColor: const Color(0xff0f1c1e),
   dialogTheme: const DialogTheme(
@@ -42,7 +69,25 @@ iconTheme: IconThemeData(
       color: Colors.white,
     ),
   ),
-  textTheme: TextTheme(
+
+  inputDecorationTheme: InputDecorationTheme(
+    labelStyle: const TextStyle(
+      color: Colors.white,
+    ),
+    border: const OutlineInputBorder(),
+    filled: true,
+    focusedBorder: const OutlineInputBorder(
+      borderSide: BorderSide(
+        color: Colors.green,
+      ),
+    ),
+    disabledBorder: const OutlineInputBorder(
+      borderSide: BorderSide(
+        color: Colors.white,
+      ),
+    ),
+    fillColor: Colors.white.withOpacity(.09),
+    // prefixIconColor: Colors.green,
   ),
   backgroundColor: const Color(0xff0f1c1e),
 );

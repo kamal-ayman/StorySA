@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -19,8 +18,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen>
-    with TickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late TabController _tabController;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -62,7 +60,6 @@ class _HomeScreenState extends State<HomeScreen>
               // _moveToHome();
             },
           );
-
           setState(() {
             StoryCubit.get(context).interstitialAd = ad;
           });
@@ -81,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen>
       builder: (context, state) {
         var cubit = StoryCubit.get(context);
         if (cubit.interstitialAd == null) {
-          // _loadInterstitialAd();
+          _loadInterstitialAd();
         }
         return WillPopScope(
           onWillPop: () async {
@@ -130,13 +127,9 @@ class _HomeScreenState extends State<HomeScreen>
                         if (cubit.selectMode)
                           Center(
                               child: Text(
-                            '${_tabController.index == 0 ? cubit.selectedPhotosID.length : cubit.selectedVideosID.length}',
-                            style: TextStyle(
-                                fontSize: 16,
-                                color: isDark
-                                    ? const Color(0xff83979d)
-                                    : Colors.white),
-                          )),
+                                  '${_tabController.index == 0 ? cubit.selectedPhotosID.length : cubit.selectedVideosID.length}',
+                                  style:
+                                      Theme.of(context).textTheme.titleLarge)),
                         if (cubit.selectMode)
                           Row(
                             children: [
@@ -145,9 +138,9 @@ class _HomeScreenState extends State<HomeScreen>
                                 splashRadius: 20,
                                 splashColor: Colors.transparent,
                                 onPressed: () {
-                                  cubit.isSelectAll?
-                                      cubit.unSelectAll()
-                                      :cubit.selectAll();
+                                  cubit.isSelectAll
+                                      ? cubit.unSelectAll()
+                                      : cubit.selectAll();
                                 },
                                 tooltip: cubit.isSelectAll
                                     ? 'deselect all'
@@ -206,7 +199,6 @@ class _HomeScreenState extends State<HomeScreen>
                         controller: _tabController,
                         children: cubit.screens.map((e) {
                           return RefreshIndicator(
-
                             color: isDark
                                 ? const Color(0xff1e2d31)
                                 : const Color(0xff008066),
@@ -370,60 +362,6 @@ class _HomeScreenState extends State<HomeScreen>
                   ),
                 ),
               ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Future<void> whatsapp4BNotInstallDialog({
-    required context,
-  }) async {
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        Color? textColor = isDark ? Colors.white : Colors.grey[700];
-        return AlertDialog(
-          backgroundColor: isDark ? const Color(0xff0f1c1e) : Colors.white,
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Please ',
-                style: TextStyle(
-                  color: textColor,
-                ),
-              ),
-              const SizedBox(
-                width: 10,
-              ),
-              Image.asset(
-                'assets/icon/icon.png',
-                height: 35,
-                width: 35,
-                filterQuality: FilterQuality.low,
-              )
-            ],
-          ),
-          content: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'Welcome to Story Saver App, there is more amazing updates will coming soon!\nYou can follow me from links below:\n',
-                  style: TextStyle(color: textColor),
-                ),
-                defaultLinkButton(
-                    color: Colors.blue,
-                    title: 'LinkedIn',
-                    link: 'https://www.linkedin.com/in/kamal-ayman/'),
-                defaultLinkButton(
-                    color: Colors.blue.shade900,
-                    title: 'Facebook',
-                    link: 'https://www.facebook.com/kamalayman159/'),
-              ],
             ),
           ),
         );

@@ -7,7 +7,6 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
 import 'package:whatsapp_share2/whatsapp_share2.dart';
 import 'package:whatsapp_story/shared/components/components.dart';
@@ -127,11 +126,11 @@ class StoryCubit extends Cubit<StoryStates> {
     videosThumbs.clear();
 
     // set default whatsAppStatusesPath WhatsApp
-    // String whatsAppStatusesPath =
-    //     '/storage/emulated/0/WhatsApp/Media/.Statuses';
-
     String whatsAppStatusesPath =
-        '/storage/emulated/0/WhatsApp/Media/WhatsApp Video/.Statuses';
+        '/storage/emulated/0/WhatsApp/Media/.Statuses';
+
+    // String whatsAppStatusesPath =
+    //     '/storage/emulated/0/WhatsApp/Media/WhatsApp Video/.Statuses';
     String whatsAppBusinessStatusesPath =
         '/storage/emulated/0/WhatsApp Business/Media/.Statuses';
 
@@ -196,18 +195,18 @@ class StoryCubit extends Cubit<StoryStates> {
     getVideoThumbnail().then((value) {
       emit(AppStatusSuccessState());
     });
-
   }
+
+  // clearCache() async {
+  //   final cacheDir = await getTemporaryDirectory();
+  //   await cacheDir.delete(recursive: true);
+  //   statusPath();
+  // }
 
   Future getVideoThumbnail() async {
     Directory pathThump = Directory(
         '${(await getTemporaryDirectory()).path}/.thumbs${primaryWhatsApp ? 'WhatsApp' : 'WhatsApp Business'}');
     pathThump.create(recursive: true);
-
-    // await pathThump.list().forEach((element) {
-    //   element.delete();
-    //   // print(element);
-    // });
 
     String testPath;
     for (int i = 0; i < videos.length; i++) {

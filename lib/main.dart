@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:whatsapp_story/shared/bloc_observer.dart';
@@ -14,15 +13,12 @@ import 'modules/splash_screen/splash_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // MobileAds.instance.initialize();
+  MobileAds.instance.initialize();
   Bloc.observer = MyBlocObserver();
   await CacheHelper.init();
   isDark = await CacheHelper.getData(key: 'isDark') ?? isDark;
   primaryWhatsApp = await CacheHelper.getData(key: 'normalWhatsApp') ?? primaryWhatsApp;
   saveFolder = await CacheHelper.getData(key: 'saveFolder') ?? saveFolder;
-
-  // CacheHelper.clearData(key: 'isDark');
-  // print(isDark);
   runApp(const StoryApp());
 }
 

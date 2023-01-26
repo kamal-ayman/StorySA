@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:intl_phone_field/countries.dart';
-import 'package:intl_phone_field/intl_phone_field.dart';
-import 'package:whatsapp_story/modules/open_chat_screen/cubit/cubit.dart';
-import 'package:whatsapp_story/shared/cubit/cubit.dart';
-import 'package:whatsapp_story/shared/cubit/states.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../shared/components/components.dart';
 import '../../shared/components/constants.dart';
 
@@ -17,11 +13,12 @@ class OpenChatScreen extends StatefulWidget {
 }
 
 class _OpenChatScreenState extends State<OpenChatScreen> {
-  var textColor = isDark ? Colors.white : Colors.black;
+  // var textColor = isDark ? Colors.white : Colors.black;
 
   final GetAdClass _getAdClass = GetAdClass();
   final GetAdClass _getAdClass0 = GetAdClass();
 
+  var phoneController = TextEditingController();
   var textController = TextEditingController();
 
   @override
@@ -42,149 +39,102 @@ class _OpenChatScreenState extends State<OpenChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => ChatCubit(),
-      child: BlocConsumer<StoryCubit, StoryStates>(
-        listener: (context, state) {},
-        builder: (context, state) {
-          var cubit = ChatCubit.get(context);
-          textController.text = cubit.message ?? '';
-          return Scaffold(
-            backgroundColor: isDark ? const Color(0xff0f1c1e) : Colors.white,
-            appBar: customAppBar(context, 'Open Chat'),
-            body: Center(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Padding(
-                  padding: const EdgeInsets.all(15),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (_getAdClass0.bannerAd != null)
-                        Align(
-                          alignment: Alignment.bottomCenter,
-                          child: SizedBox(
-                            width: _getAdClass0.bannerAd!.size.width.toDouble(),
-                            height: _getAdClass0.bannerAd!.size.height.toDouble(),
-                            child: AdWidget(ad: _getAdClass0.bannerAd!),
-                          ),
-                        ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      Text(
-                        'Now you can open chats without saved any contact in your phone.${cubit.defaultCountry()??'\nDon\'t type 0'}',
-                        style: TextStyle(
-                          color: textColor,
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      IntlPhoneField(
-                        dropdownTextStyle: TextStyle(color: textColor),
-                        cursorColor: Colors.green,
-                        style: TextStyle(
-                          color: textColor,
-                        ),
-                        decoration: InputDecoration(
-                          labelText: 'Phone Number',
-                          filled: true,
-                          fillColor: Colors.white.withOpacity(.09),
-                          labelStyle: TextStyle(
-                            color: textColor,
-                          ),
-                          counterStyle: TextStyle(color: textColor),
-                          border: const OutlineInputBorder(),
-                          focusedBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.green,
-                            ),
-                          ),
-                        ),
-                        initialCountryCode: cubit.defaultCountry() ?? 'EG',
-                        onChanged: (phone) {
-                          cubit.phoneNumber = phone.completeNumber;
-                        },
-                        onCountryChanged: (Country country) {
-                          cubit.defaultCountry(defaultCountryCode: country.code);
-                        },
-                        textInputAction: TextInputAction.next,
-                      ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        controller: textController,
-                        textInputAction: TextInputAction.go,
-                        textAlign: TextAlign.center,
-                        cursorColor: Colors.green,
-                        style: TextStyle(color: textColor),
-                        decoration: InputDecoration(
-                          labelText: 'Type a message (optional)',
-                          filled: true,
-                          fillColor: Colors.white.withOpacity(.09),
-                          labelStyle: TextStyle(
-                            color: textColor,
-                          ),
-                          border: const OutlineInputBorder(),
-                          focusedBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.green,
-                            ),
-                          ),
-                          disabledBorder: const OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.green,
-                            ),
-                          ),
-                        ),
-                        onChanged: (String? text) {
-                          cubit.message = text;
-                        },
-                        onFieldSubmitted: (String? text) {
-                          cubit.openChat(context);
-                        },
-                      ),
-                      const SizedBox(
-                        height: 25,
-                      ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: MaterialButton(
-                              height: 45,
-                              onPressed: () {
-                                cubit.openChat(context);
-                              },
-                              color: Colors.green,
-                              child: const Text(
-                                'Open',
-                                style: TextStyle(fontSize: 20),
-                              ),
-                              textColor: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      if (_getAdClass.bannerAd != null)
-                        Align(
-                          alignment: Alignment.bottomCenter,
-                          child: SizedBox(
-                            width: _getAdClass.bannerAd!.size.width.toDouble(),
-                            height: _getAdClass.bannerAd!.size.height.toDouble(),
-                            child: AdWidget(ad: _getAdClass.bannerAd!),
-                          ),
-                        ),
-                    ],
+    return Scaffold(
+      // backgroundColor: isDark ? const Color(0xff0f1c1e) : Colors.white,
+      appBar: customAppBar(context, 'Open Chat'),
+      body: Center(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Padding(
+            padding: const EdgeInsets.all(15),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 20),
+                  child: Text(
+                    'Now you can open chats without saved any contact in your phone.',
+                    style: Theme.of(context).textTheme.titleSmall
                   ),
                 ),
-              ),
+                defaultTextFormField(
+                    'Phone Number', CupertinoIcons.plus, phoneController, true),
+                const SizedBox(height: 15),
+                defaultTextFormField('Type a message (optional)',
+                    CupertinoIcons.chat_bubble_text, textController, false),
+                const SizedBox(
+                  height: 25,
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: MaterialButton(
+                        height: 45,
+                        onPressed: () {
+                          openChat(context, phoneController.text,
+                              textController.text);
+                        },
+                        color: Colors.green,
+                        child: const Text(
+                          'Open',
+                          style: TextStyle(fontSize: 20),
+                        ),
+                        textColor: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                if (_getAdClass0.bannerAd != null)
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: SizedBox(
+                      width: _getAdClass0.bannerAd!.size.width.toDouble(),
+                      height: _getAdClass0.bannerAd!.size.height.toDouble(),
+                      child: AdWidget(ad: _getAdClass0.bannerAd!),
+                    ),
+                  ),
+                if (_getAdClass.bannerAd != null)
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: SizedBox(
+                      width: _getAdClass.bannerAd!.size.width.toDouble(),
+                      height: _getAdClass.bannerAd!.size.height.toDouble(),
+                      child: AdWidget(ad: _getAdClass.bannerAd!),
+                    ),
+                  ),
+              ],
             ),
-          );
-        },
+          ),
+        ),
       ),
     );
+  }
+
+  defaultTextFormField(text, icon, controller, bool isPhone) {
+    return TextFormField(
+      keyboardType: isPhone ? TextInputType.phone : TextInputType.text,
+      controller: controller,
+      style: Theme.of(context).textTheme.titleLarge,
+      textInputAction: TextInputAction.next,
+      textAlign: TextAlign.center,
+      cursorColor: isDark?Colors.white:Colors.green,
+      decoration: InputDecoration(
+          labelText: text,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          prefixIcon: Icon(icon),
+      ),
+    );
+  }
+
+  openChat(BuildContext context, String phone, String text) {
+    if (phone != '') {
+      if (phone.startsWith('0')) phone = '2' + phone;
+      if (phone[0] != '+') phone = '+' + phone;
+      var whatsappUrl = "whatsapp://send?phone=$phone&text=$text";
+      launch(whatsappUrl);
+    }
   }
 }

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../layout/layout.dart';
 import '../../shared/components/constants.dart';
@@ -14,8 +13,8 @@ class SplashScreen extends StatelessWidget {
     Timer(
       const Duration(milliseconds: 500),
       () {
-        Navigator.of(context)
-            .pushReplacement(MaterialPageRoute(builder: (_) => const HomeScreen()));
+        Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const HomeScreen()));
       },
     );
 
