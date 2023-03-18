@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:whatsapp_story/shared/cubit/cubit.dart';
 import '../../shared/components/components.dart';
 import '../../shared/components/constants.dart';
 
@@ -130,11 +131,16 @@ class _OpenChatScreenState extends State<OpenChatScreen> {
   }
 
   openChat(BuildContext context, String phone, String text) {
-    if (phone != '') {
-      if (phone.startsWith('0')) phone = '2' + phone;
-      if (phone[0] != '+') phone = '+' + phone;
-      var whatsappUrl = "whatsapp://send?phone=$phone&text=$text";
-      launch(whatsappUrl);
+    if (StoryCubit.get(context).isWhatsappInstalled || StoryCubit.get(context).isWhatsapp4BInstalled)
+      {
+        if (phone != '') {
+          if (phone.startsWith('0')) phone = '2' + phone;
+          if (phone[0] != '+') phone = '+' + phone;
+          var whatsappUrl = "whatsapp://send?phone=$phone&text=$text";
+          launch(whatsappUrl);
+        }
+      }else {
+      toastShow(text: 'WhatsApp Not Found', state: ToastStates.ERROR);
     }
   }
 }

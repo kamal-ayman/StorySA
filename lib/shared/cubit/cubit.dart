@@ -145,6 +145,9 @@ class StoryCubit extends Cubit<StoryStates> {
         whatsAppBusinessStatusesPath =
             '/storage/emulated/0/$newPath Business/Media/.Statuses';
       }
+    }).catchError((e){
+      toastShow(text: 'WhatsAppPathNotFound\nCheck your Storage Permission', state: ToastStates.ERROR);
+      emit(AppStatusErrorState());
     });
 
     // get unsorted data
@@ -161,6 +164,9 @@ class StoryCubit extends Cubit<StoryStates> {
         videos.addAll({videoID: FileModel(file: file as File)});
         unselectedVideosID.add(videoID++);
       }
+    }).catchError((e){
+      toastShow(text: 'WhatsAppPathNotFound\nCheck your Storage Permission', state: ToastStates.ERROR);
+      emit(AppStatusErrorState());
     });
 
     File file;

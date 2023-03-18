@@ -5,6 +5,7 @@ class AppInitialState extends StoryStates {}
 class ChangeIndexState extends StoryStates {}
 
 class AppStatusLoadingState extends StoryStates {}
+class AppStatusErrorState extends StoryStates {}
 
 class AppStatusSuccessState extends StoryStates {}
 

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:open_store/open_store.dart';
 import 'package:whatsapp_story/shared/components/components.dart';
@@ -309,7 +310,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ),
                       customListTile(
                         selected: primaryWhatsApp,
-                        leading: Icons.whatsapp,
+                        leading: FontAwesomeIcons.whatsapp,
                         onTap: () {
                           Navigator.pop(context);
                           if (!primaryWhatsApp) {
@@ -325,7 +326,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       ),
                       customListTile(
                         selected: !primaryWhatsApp,
-                        leading: Icons.whatsapp,
+                        leading: FontAwesomeIcons.whatsapp,
                         onTap: () async {
                           Navigator.pop(context);
                           if (primaryWhatsApp) {

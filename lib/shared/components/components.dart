@@ -1,3 +1,4 @@
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
@@ -381,7 +382,7 @@ Widget customListTile({
         const Icon(Icons.navigate_next_rounded),
       ],
     ),
-    leading: Icon(leading, size: 26),
+    leading: FaIcon(leading, size: 26),
     textColor: isDark ? Colors.white : Colors.grey[700],
     iconColor: isDark ? Colors.white : Colors.grey[700],
     tileColor: isDark ? Colors.black12 : Colors.grey[100],
@@ -545,7 +546,7 @@ Widget defaultSelectButton({
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.whatsapp, color: Colors.white, size: 30),
+                const Icon(CupertinoIcons.chat_bubble_2, color: Colors.white, size: 30),
                 const SizedBox(width: 5),
                 Expanded(
                   child: Text(

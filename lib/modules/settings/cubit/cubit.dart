@@ -4,6 +4,7 @@ import 'package:easy_folder_picker/FolderPicker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../../shared/components/constants.dart';
 import '../../../shared/cubit/cubit.dart';
@@ -21,6 +22,15 @@ class SettingsCubit extends Cubit<SettingsStates> {
     StoryCubit.get(context).statusPath();
   }
   Future<void> pickDirectory(context) async {
+    var status = await Permission.storage.status;
+    if (status.isDenied) {
+      await Permission.storage.request();
+    }
+    status = await Permission.manageExternalStorage.status;
+    if (status.isDenied) {
+      await Permission.manageExternalStorage.request();
+    }
+
     await Directory(saveFolder).create(recursive: true);
     Directory? newDirectory = await FolderPicker.pick(
       allowFolderCreation: true,
