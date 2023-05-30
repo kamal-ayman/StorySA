@@ -15,22 +15,19 @@ class VideoScreen extends StatefulWidget {
       : super(key: key);
 
   @override
-  State<VideoScreen> createState() => _VideoScreenState(id: id, file: file);
+  State<VideoScreen> createState() => _VideoScreenState();
 }
 
 class _VideoScreenState extends State<VideoScreen> {
-  File file;
-  int id;
   bool canPlay = true;
   bool isPlaying = true;
   late VideoPlayerController controller;
 
-  _VideoScreenState({required this.file, required this.id});
 
   @override
   void initState() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
-    controller = VideoPlayerController.file(file);
+    controller = VideoPlayerController.file(widget.file);
     controller.addListener(() {});
     controller.setLooping(false);
     controller.initialize().then((_) => setState(() {}));
@@ -43,12 +40,27 @@ class _VideoScreenState extends State<VideoScreen> {
     controller.dispose();
     super.dispose();
   }
+  void switchShowOptions() {
+    showOptions = !showOptions;
+    setState(() {
+    });
+  }
+  final listId = StoryCubit.savedUnselectedVideosID;
+
+  bool showOptions = false;
 
   @override
   Widget build(BuildContext context) {
-    int len = StoryCubit.get(context).videos.length;
-    bool back = id - 1 >= 0;
-    bool next = id + 1 < len;
+    late int len;
+    bool back = false;
+    bool next = false;
+    if (StoryCubit.get(context).isShowSavedStatus) {
+      len = StoryCubit.get(context).savedVideos.length;
+    } else {
+      len = StoryCubit.get(context).videos.length;
+    }
+    back = widget.id - 1 >= 0;
+    next = widget.id + 1 < len;
     return BlocConsumer<StoryCubit, StoryStates>(
       listener: (context, state) {},
       builder: (context, state) {
@@ -63,7 +75,7 @@ class _VideoScreenState extends State<VideoScreen> {
             backgroundColor: Colors.black,
             body: InkWell(
               onTap: () {
-                cubit.switchShowOptions();
+                switchShowOptions();
               },
               child: Stack(
                 children: [
@@ -72,21 +84,21 @@ class _VideoScreenState extends State<VideoScreen> {
                       aspectRatio: controller.value.aspectRatio,
                       child: InkWell(
                         onTap: () {
-                          cubit.switchShowOptions();
+                          switchShowOptions();
                         },
-                        child: VideoPlayer(controller),
                         highlightColor: Colors.transparent,
+                        child: VideoPlayer(controller),
                       ),
                     ),
                   ),
                   AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
                     reverseDuration: const Duration(milliseconds: 300),
-                    child: !cubit.showOptions
+                    child: !showOptions
                         ? null
                         : InkWell(
                             onTap: () {
-                              cubit.switchShowOptions();
+                              switchShowOptions();
                             },
                             highlightColor: Colors.transparent,
                           ),
@@ -94,11 +106,11 @@ class _VideoScreenState extends State<VideoScreen> {
                   AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
                     reverseDuration: const Duration(milliseconds: 300),
-                    child: !cubit.showOptions
+                    child: !showOptions
                         ? null
                         : InkWell(
                             onTap: () {
-                              cubit.switchShowOptions();
+                              switchShowOptions();
                             },
                             child: Column(
                               children: [
@@ -148,10 +160,12 @@ class _VideoScreenState extends State<VideoScreen> {
                                                             animation1,
                                                             animation2) =>
                                                         VideoScreen(
-                                                            file: cubit
-                                                                .videos[id - 1]!
+                                                            file: cubit.isShowSavedStatus ?cubit
+                                                                .savedVideos[widget.id - 1]!
+                                                                .file:cubit
+                                                                .videos[widget.id - 1]!
                                                                 .file,
-                                                            id: id - 1),
+                                                            id: widget.id - 1),
                                                     transitionDuration:
                                                         Duration.zero,
                                                     reverseTransitionDuration:
@@ -202,10 +216,13 @@ class _VideoScreenState extends State<VideoScreen> {
                                                             animation1,
                                                             animation2) =>
                                                         VideoScreen(
-                                                            file: cubit
-                                                                .videos[id + 1]!
+                                                            file: cubit.isShowSavedStatus ?cubit
+                                                                .savedVideos[widget.id + 1]!
+                                                                .file:cubit
+                                                                .videos[widget.id + 1]!
                                                                 .file,
-                                                            id: id + 1),
+                                                            id: widget.id + 1,
+                                                        ),
                                                     transitionDuration:
                                                         Duration.zero,
                                                     reverseTransitionDuration:
@@ -229,6 +246,7 @@ class _VideoScreenState extends State<VideoScreen> {
                                             splashRadius: 20,
                                             padding: EdgeInsets.zero,
                                           ),
+                                          if (!cubit.isShowSavedStatus)
                                           IconButton(
                                             visualDensity:
                                                 VisualDensity.compact,
@@ -237,7 +255,7 @@ class _VideoScreenState extends State<VideoScreen> {
                                             padding: EdgeInsets.zero,
                                             onPressed: () {
                                               StoryCubit.get(context)
-                                                  .saveCurrentStory(file);
+                                                  .saveCurrentStory(widget.file);
                                             },
                                             icon: const Icon(CupertinoIcons
                                                 .square_arrow_down_on_square),
@@ -256,7 +274,7 @@ class _VideoScreenState extends State<VideoScreen> {
                   AnimatedSwitcher(
                     duration: const Duration(milliseconds: 300),
                     reverseDuration: const Duration(milliseconds: 300),
-                    child: !cubit.showOptions
+                    child: !showOptions
                         ? null
                         : Padding(
                             padding: const EdgeInsets.all(15),
@@ -277,7 +295,7 @@ class _VideoScreenState extends State<VideoScreen> {
                                   CupertinoIcons.reply,
                                   () async {
                                     cubit.shareOneFile(
-                                        path: file.path,
+                                        path: widget.file.path,
                                         toWhatsapp: true,
                                         context: context);
                                   },
@@ -287,7 +305,7 @@ class _VideoScreenState extends State<VideoScreen> {
                                   CupertinoIcons.share,
                                   () {
                                     cubit.shareOneFile(
-                                        path: file.path, toWhatsapp: false);
+                                        path: widget.file.path, toWhatsapp: false);
                                   },
                                 ),
                               ],

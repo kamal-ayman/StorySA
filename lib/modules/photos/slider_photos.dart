@@ -41,16 +41,16 @@ class _PhotosSliderState extends State<PhotosSlider> {
     });
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
-    _getAdClass.getAd(context);
+    // _getAdClass.getAd(context);
   }
 
   @override
   void dispose() {
 
     super.dispose();
-    _getAdClass.bannerAd!.dispose();
+    // _getAdClass.bannerAd!.dispose();
     // StoryCubit.get(context).bannerAd?.dispose();
-    _getAdClass.bannerAd!.dispose();
+    // _getAdClass.bannerAd!.dispose();
     // StoryCubit.get(context).interstitialAd?.dispose();
   }
 
@@ -58,7 +58,7 @@ class _PhotosSliderState extends State<PhotosSlider> {
   Widget build(BuildContext context) {
 
 
-    _getAdClass.getAd(context);
+    // _getAdClass.getAd(context);
 
     return BlocConsumer<StoryCubit, StoryStates>(
       listener: (context, state) {},
@@ -76,10 +76,10 @@ class _PhotosSliderState extends State<PhotosSlider> {
                 PhotoViewGallery.builder(
                   pageController: pageController,
                   enableRotation: true,
-                  itemCount: cubit.photos.length,
+                  itemCount: cubit.isShowSavedStatus ? cubit.savedPhotos.length:cubit.photos.length,
                   builder: (context, index) {
                     return PhotoViewGalleryPageOptions(
-                      imageProvider: FileImage(cubit.photos[index]!.file),
+                      imageProvider: FileImage(cubit.isShowSavedStatus ? cubit.savedPhotos[index]!.file:cubit.photos[index]!.file),
                       minScale: PhotoViewComputedScale.contained * .8,
                       maxScale: PhotoViewComputedScale.contained * 2,
                     );
@@ -91,16 +91,16 @@ class _PhotosSliderState extends State<PhotosSlider> {
                   visible: true,
                   replyFun: () {
                     cubit.shareOneFile(
-                        path: cubit.photos[id]!.file.path,
+                        path: cubit.isShowSavedStatus ? cubit.savedPhotos[id]!.file.path:cubit.photos[id]!.file.path,
                         toWhatsapp: true,
                         context: context);
                   },
                   shareFun: () {
                     cubit.shareOneFile(
-                        path: cubit.photos[id]!.file.path, toWhatsapp: false);
+                        path: cubit.isShowSavedStatus ? cubit.savedPhotos[id]!.file.path:cubit.photos[id]!.file.path, toWhatsapp: false);
                   },
                   downloadFun: () {
-                    cubit.saveCurrentStory(cubit.photos[id]!.file);
+                    cubit.saveCurrentStory(cubit.isShowSavedStatus ? cubit.savedPhotos[id]!.file:cubit.photos[id]!.file);
                   },
                 ),
                 if (_getAdClass.bannerAd != null)

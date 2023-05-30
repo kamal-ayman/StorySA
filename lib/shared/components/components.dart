@@ -15,7 +15,7 @@ import '../../modules/videos/open_video_screen.dart';
 
 Future<bool?> toastShow({
   required String text,
-  required ToastStates state,
+  ToastStates state = ToastStates.SUCCESS,
 }) =>
     Fluttertoast.showToast(
         msg: text,
@@ -55,6 +55,53 @@ Widget buildItem({
   required ItemState state,
 }) {
   return InkWell(
+    onTap: () {
+      /// TODO: un comments ads
+      // if (!cubit.selectMode) {
+      //   adcount++;
+      //   print(adcount);
+      //   if (adcount % 5 == 0) {
+      //     print(adcount);
+      //     cubit.interstitialAd?.show().then((value) {
+      //       cubit.interstitialAd = null;
+      //     });
+      //   }
+      //   cubit.interstitialAd?.show().then((value) {
+      //     cubit.interstitialAd;
+      //   });
+      // }
+
+      if (state == ItemState.Video || state == ItemState.SavedVideo) {
+        if (cubit.selectMode) {
+          isSelected ? cubit.unSelectItem(id) : cubit.selectItem(id);
+        } else {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => VideoScreen(
+                file: state == ItemState.SavedVideo?cubit.savedVideos[id]!.file:cubit.videos[id]!.file,
+                id: id,
+              ),
+            ),
+          );
+        }
+      } else {
+        if (cubit.selectMode) {
+          isSelected ? cubit.unSelectItem(id) : cubit.selectItem(id);
+        } else {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => PhotosSlider(
+                id: id,
+              ),
+            ),
+          );
+        }
+      }
+    },
+    onLongPress: () {
+      isSelected ? cubit.unSelectItem(id) : cubit.selectItem(id);
+    },
+    highlightColor: Colors.transparent,
     child: Stack(
       children: [
         AnimatedContainer(
@@ -109,7 +156,7 @@ Widget buildItem({
             ],
           ),
         ),
-        if (state == ItemState.Video)
+        if (state == ItemState.Video || state == ItemState.SavedVideo)
           Align(
             alignment: Alignment.center,
             child: Container(
@@ -125,56 +172,10 @@ Widget buildItem({
           ),
       ],
     ),
-    onTap: () {
-      if (!cubit.selectMode) {
-        adcount++;
-        print(adcount);
-        if (adcount % 5 == 0) {
-          print(adcount);
-          cubit.interstitialAd?.show().then((value) {
-            cubit.interstitialAd = null;
-          });
-        }
-        cubit.interstitialAd?.show().then((value) {
-          cubit.interstitialAd;
-        });
-      }
-
-      if (state == ItemState.Video) {
-        if (cubit.selectMode) {
-          isSelected ? cubit.unSelectItem(id) : cubit.selectItem(id);
-        } else {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => VideoScreen(
-                file: cubit.videos[id]!.file,
-                id: id,
-              ),
-            ),
-          );
-        }
-      } else {
-        if (cubit.selectMode) {
-          isSelected ? cubit.unSelectItem(id) : cubit.selectItem(id);
-        } else {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => PhotosSlider(
-                id: id,
-              ),
-            ),
-          );
-        }
-      }
-    },
-    onLongPress: () {
-      isSelected ? cubit.unSelectItem(id) : cubit.selectItem(id);
-    },
-    highlightColor: Colors.transparent,
   );
 }
 
-enum ItemState { Video, Image, Saved }
+enum ItemState { Video, SavedVideo, Image, SavedImage }
 
 Widget buildAllItems(
     double width, BuildContext context, StoryCubit cubit, ItemState state) {
@@ -184,27 +185,52 @@ Widget buildAllItems(
     mainAxisSpacing: 4,
     crossAxisSpacing: 4,
     childAspectRatio: 1,
-    children: state == ItemState.Video
-        ? cubit.videos.keys.map((id) {
-            return buildItem(
-                context: context,
-                cubit: cubit,
-                width: width,
-                id: id,
-                file: cubit.videosThumbs[id],
-                isSelected: cubit.videos[id]!.isSelected,
-                state: state);
-          }).toList()
-        : cubit.photos.keys.map((id) {
-            return buildItem(
-                context: context,
-                cubit: cubit,
-                width: width,
-                id: id,
-                file: cubit.photos[id]!.file,
-                isSelected: cubit.photos[id]!.isSelected,
-                state: state);
-          }).toList(),
+    children: [
+      if (state == ItemState.Video)
+        ...cubit.videos.keys.map((id) {
+          return buildItem(
+              context: context,
+              cubit: cubit,
+              width: width,
+              id: id,
+              file: cubit.videos[id]!.thumb,
+              isSelected: cubit.videos[id]!.isSelected,
+              state: state);
+        }).toList(),
+      if (state == ItemState.Image)
+        ...cubit.photos.keys.map((id) {
+          return buildItem(
+              context: context,
+              cubit: cubit,
+              width: width,
+              id: id,
+              file: cubit.photos[id]!.file,
+              isSelected: cubit.photos[id]!.isSelected,
+              state: state);
+        }).toList(),
+      if (state == ItemState.SavedVideo)
+        ...cubit.savedVideos.keys.map((id) {
+          return buildItem(
+              context: context,
+              cubit: cubit,
+              width: width,
+              id: id,
+              file: cubit.savedVideos[id]!.thumb,
+              isSelected: cubit.savedVideos[id]!.isSelected,
+              state: state);
+        }).toList(),
+      if (state == ItemState.SavedImage)
+        ...cubit.savedPhotos.keys.map((id) {
+          return buildItem(
+              context: context,
+              cubit: cubit,
+              width: width,
+              id: id,
+              file: cubit.savedPhotos[id]!.file,
+              isSelected: cubit.savedPhotos[id]!.isSelected,
+              state: state);
+        }).toList(),
+    ],
   );
 }
 
@@ -239,13 +265,13 @@ void share(
     required context}) {
   if (cubit.index == 0) {
     cubit.shareFiles(
-      type: FileType.Photos,
+      type: FileType.photos,
       shareToWhatsApp: isToWhatsApp,
       context: context,
     );
   } else if (cubit.index == 1) {
     cubit.shareFiles(
-      type: FileType.Videos,
+      type: FileType.videos,
       shareToWhatsApp: isToWhatsApp,
       context: context,
     );
@@ -280,12 +306,14 @@ Widget fabShareButton({
           label: 'Repost',
           onTap: replyFun,
         ),
-        customSpeedDial(
-          icon: CupertinoIcons.share,
-          label: 'Share',
-          onTap: shareFun,
-        ),
-        customSpeedDial(
+          customSpeedDial(
+            icon: CupertinoIcons.share,
+            label: 'Share',
+            onTap: shareFun,
+          ),
+
+        if (downloadFun != null)
+          customSpeedDial(
           icon: CupertinoIcons.square_arrow_down_on_square,
           label: 'Save',
           onTap: downloadFun,
@@ -527,7 +555,7 @@ Widget defaultSelectButton({
             path: path,
             toWhatsapp: true,
             whatsappType:
-                id == 0 ? WhatsappType.Whatsapp : WhatsappType.BusinessWhatsapp,
+                id == 0 ? WhatsappType.whatsapp : WhatsappType.businessWhatsapp,
           );
         } else {
           StoryCubit.get(context).shareFiles(
@@ -536,7 +564,7 @@ Widget defaultSelectButton({
             context: context,
             shareToWhatsApp: true,
             whatsappType:
-                id == 0 ? WhatsappType.Whatsapp : WhatsappType.BusinessWhatsapp,
+                id == 0 ? WhatsappType.whatsapp : WhatsappType.businessWhatsapp,
           );
         }
       },
@@ -546,7 +574,8 @@ Widget defaultSelectButton({
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(CupertinoIcons.chat_bubble_2, color: Colors.white, size: 30),
+                const Icon(FontAwesomeIcons.whatsapp,
+                    color: Colors.white, size: 30),
                 const SizedBox(width: 5),
                 Expanded(
                   child: Text(
@@ -577,6 +606,8 @@ Widget defaultLinkButton({
     onPressed: () {
       launch(link);
     },
+    height: 40,
+    color: color,
     child: Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -586,15 +617,15 @@ Widget defaultLinkButton({
         ),
       ],
     ),
-    height: 40,
-    color: color,
   );
 }
 
-Widget noStoryShow() {
+Widget noStoryShow(isShowSavedStatus) {
   return SliverFillRemaining(
     child: Center(
       child: Text(
+        isShowSavedStatus?
+        'No Story Yet\nSave some stories first!':
         'No Story Yet\nOpen some stories on whatsapp',
         textAlign: TextAlign.center,
         style: TextStyle(

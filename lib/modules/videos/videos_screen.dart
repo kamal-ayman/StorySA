@@ -40,10 +40,10 @@ class VideosScreen extends StatelessWidget {
             ),
           ),
           widgetBuilder: (context) {
-            if (cubit.videos.isEmpty) {
-              return noStoryShow();
+            if (cubit.isShowSavedStatus? cubit.savedVideos.isEmpty: cubit.videos.isEmpty) {
+              return noStoryShow(cubit.isShowSavedStatus);
             }
-            return buildAllItems(width, context, cubit, ItemState.Video);
+            return buildAllItems(width, context, cubit, cubit.isShowSavedStatus ? ItemState.SavedVideo: ItemState.Video);
           },
         );
       },

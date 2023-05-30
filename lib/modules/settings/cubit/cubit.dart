@@ -19,7 +19,7 @@ class SettingsCubit extends Cubit<SettingsStates> {
   clearCache(context) async {
     final cacheDir = await getTemporaryDirectory();
     await cacheDir.delete(recursive: true);
-    StoryCubit.get(context).statusPath();
+    StoryCubit.get(context).getStatusFiles();
   }
   Future<void> pickDirectory(context) async {
     var status = await Permission.storage.status;

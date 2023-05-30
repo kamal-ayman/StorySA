@@ -50,7 +50,7 @@ class StoryCubit extends Cubit<StoryStates> {
   Future getStoragePermission() async {
     permissionStatus = await Permission.storage.request().then((value) {
       if (value.isGranted) {
-        statusPath();
+        getStatusFiles();
       } else {
         emit(PermissionDeniedState());
       }
@@ -61,7 +61,8 @@ class StoryCubit extends Cubit<StoryStates> {
   chanePathStatuses({required bool isNormal}) {
     primaryWhatsApp = isNormal;
     CacheHelper.saveData(key: 'normalWhatsApp', value: primaryWhatsApp);
-    statusPath();
+    if (isShowSavedStatus) changeSavedLayout();
+    getStatusFiles();
     emit(ChangePathStatusesState());
   }
 
@@ -107,121 +108,162 @@ class StoryCubit extends Cubit<StoryStates> {
   Map<int, FileModel> videos = {};
   List<int> selectedVideosID = [];
   List<int> unselectedVideosID = [];
-  List<File> videosThumbs = [];
 
-  statusPath() async {
-    disableSelectMode();
-    emit(AppStatusLoadingState());
-    // clear all data.
+  Map<int, FileModel> savedPhotos = {};
+  List<int> savedSelectedPhotosID = [];
+  List<int> savedUnselectedPhotosID = [];
 
-    photoID = 0;
+  Map<int, FileModel> savedVideos = {};
+  List<int> savedSelectedVideosID = [];
+  static List<int> savedUnselectedVideosID = [];
+
+
+  void clearPhotosData(){
     photos.clear();
     selectedPhotosID.clear();
     unselectedPhotosID.clear();
+  }
 
-    videoID = 0;
+  void clearVideosData(){
     videos.clear();
     selectedVideosID.clear();
     unselectedVideosID.clear();
-    videosThumbs.clear();
-
-    // set default whatsAppStatusesPath WhatsApp
-    String whatsAppStatusesPath =
-        '/storage/emulated/0/WhatsApp/Media/.Statuses';
-
-    // String whatsAppStatusesPath =
-    //     '/storage/emulated/0/WhatsApp/Media/WhatsApp Video/.Statuses';
-    String whatsAppBusinessStatusesPath =
-        '/storage/emulated/0/WhatsApp Business/Media/.Statuses';
-
-    await Directory(primaryWhatsApp
-            ? whatsAppStatusesPath
-            : whatsAppBusinessStatusesPath)
-        .exists()
-        .then((value) {
-      if (!value) {
-        String newPath = 'Android/media/com.whatsapp/WhatsApp';
-        whatsAppStatusesPath = '/storage/emulated/0/$newPath/Media/.Statuses';
-        whatsAppBusinessStatusesPath =
-            '/storage/emulated/0/$newPath Business/Media/.Statuses';
-      }
-    }).catchError((e){
-      toastShow(text: 'WhatsAppPathNotFound\nCheck your Storage Permission', state: ToastStates.ERROR);
-      emit(AppStatusErrorState());
-    });
-
-    // get unsorted data
-    await Directory(primaryWhatsApp
-            ? whatsAppStatusesPath
-            : whatsAppBusinessStatusesPath)
-        .list()
-        .forEach((file) {
-      String type = file.path.split('.').last;
-      if (type == 'jpg') {
-        photos.addAll({photoID: FileModel(file: file as File)});
-        unselectedPhotosID.add(photoID++);
-      } else if (type == 'mp4') {
-        videos.addAll({videoID: FileModel(file: file as File)});
-        unselectedVideosID.add(videoID++);
-      }
-    }).catchError((e){
-      toastShow(text: 'WhatsAppPathNotFound\nCheck your Storage Permission', state: ToastStates.ERROR);
-      emit(AppStatusErrorState());
-    });
-
-    File file;
-
-    // sort images by date
-    for (int i = 0; i < photos.length; i++) {
-      for (int j = i + 1; j < photos.length; j++) {
-        if (FileStat.statSync(photos[i]!.file.path)
-            .modified
-            .isBefore(FileStat.statSync(photos[j]!.file.path).modified)) {
-          file = photos[i]!.file;
-          photos[i]!.file = photos[j]!.file;
-          photos[j]!.file = file;
-        }
-      }
-    }
-
-    // sort videos by date
-    for (int i = 0; i < videos.length; i++) {
-      for (int j = i + 1; j < videos.length; j++) {
-        if (FileStat.statSync(videos[i]!.file.path)
-            .modified
-            .isBefore(FileStat.statSync(videos[j]!.file.path).modified)) {
-          file = videos[i]!.file;
-          videos[i]!.file = videos[j]!.file;
-          videos[j]!.file = file;
-        }
-      }
-      videosThumbs.add(File(''));
-    }
-
-    getVideoThumbnail().then((value) {
-      emit(AppStatusSuccessState());
-    });
+  }
+  void clearSavedPhotosData(){
+    savedPhotos.clear();
+    savedSelectedPhotosID.clear();
+    savedUnselectedPhotosID.clear();
   }
 
-  // clearCache() async {
-  //   final cacheDir = await getTemporaryDirectory();
-  //   await cacheDir.delete(recursive: true);
-  //   statusPath();
-  // }
+  void clearSavedVideosData(){
+    savedVideos.clear();
+    savedSelectedVideosID.clear();
+    savedUnselectedVideosID.clear();
+  }
+  void clearData(){
+    photoID = 0;
+    videoID = 0;
+    if (isShowSavedStatus) {
+      clearSavedPhotosData();
+      clearSavedVideosData();
+    } else {
+      clearPhotosData();
+      clearVideosData();
+    }
+    print(savedVideos.isEmpty);
+  }
+
+
+  void sortFiles(Map<int, FileModel> files) {
+    File file;
+    for (int i = 0; i < files.length; i++) {
+      for (int j = i + 1; j < files.length; j++) {
+        if (FileStat.statSync(files[i]!.file.path).modified.isBefore(FileStat.statSync(files[j]!.file.path).modified)) {
+          file = files[i]!.file;
+          files[i]!.file = files[j]!.file;
+          files[j]!.file = file;
+        }
+      }
+    }
+  }
+  bool isShowSavedStatus = false;
+
+  changeSavedLayout(){
+    disableSelectMode();
+    isShowSavedStatus = !isShowSavedStatus;
+    emit(AppShowSavedStatusState());
+  }
+  Future getUnsortedFiles() async {
+    if (!isShowSavedStatus) {
+      String whatsAppStatusesPath = '/storage/emulated/0/WhatsApp/Media/.Statuses';
+      String whatsAppBusinessStatusesPath = '/storage/emulated/0/WhatsApp Business/Media/.Statuses';
+      final res = await Directory(
+          primaryWhatsApp ? whatsAppStatusesPath : whatsAppBusinessStatusesPath)
+          .exists();
+      if (!res) {
+        const String newPath = 'Android/media/com.whatsapp/WhatsApp';
+        whatsAppStatusesPath = '/storage/emulated/0/$newPath/Media/.Statuses';
+        whatsAppBusinessStatusesPath =
+        '/storage/emulated/0/$newPath Business/Media/.Statuses';
+      }
+      await Directory(primaryWhatsApp ? whatsAppStatusesPath : whatsAppBusinessStatusesPath).list().forEach((file) {
+        final String type = file.path
+            .split('.')
+            .last;
+        if (type == 'jpg') {
+          photos.addAll({photoID: FileModel(file: File(file.path))});
+          unselectedPhotosID.add(photoID++);
+        } else if (type == 'mp4') {
+          videos.addAll({videoID: FileModel(file: File(file.path))});
+          videos[videoID]?.thumb = File('');
+          unselectedVideosID.add(videoID++);
+        }
+      });
+    } else {
+      await Directory(saveFolder).list().forEach((file) {
+        final String type = file.path.split('.').last;
+        if (type == 'jpg') {
+          savedPhotos.addAll({photoID: FileModel(file: File(file.path))});
+          savedUnselectedPhotosID.add(photoID++);
+        } else if (type == 'mp4') {
+          savedVideos.addAll({videoID: FileModel(file: File(file.path))});
+          savedVideos[videoID]?.thumb = File('');
+          savedUnselectedVideosID.add(videoID++);
+        }
+      });
+    }
+  }
+
+  Future<void> getStatusFiles() async {
+    emit(AppStatusLoadingState());
+
+    disableSelectMode();
+
+    clearData();
+
+    await getUnsortedFiles();
+
+    sortFiles(photos);
+    sortFiles(videos);
+
+    await getVideoThumbnail();
+    emit(AppStatusSuccessState());
+  }
 
   Future getVideoThumbnail() async {
-    Directory pathThump = Directory(
-        '${(await getTemporaryDirectory()).path}/.thumbs${primaryWhatsApp ? 'WhatsApp' : 'WhatsApp Business'}');
+    if (isShowSavedStatus) {
+      print('true');
+      final Directory pathThump = Directory('${(await getTemporaryDirectory()).path}/.thumbsSaved}');
+      pathThump.create(recursive: true);
+      String testPath;
+      for (int i = 0; i < savedVideos.length; i++) {
+        testPath = '${pathThump.path}/${savedVideos[i]!.file.path.split('/').last.split('.').first}.jpg';
+        if (File(testPath).existsSync()) {
+          savedVideos[i]?.thumb = File(testPath);
+        } else {
+          await VideoThumbnail.thumbnailFile(
+            imageFormat: ImageFormat.JPEG,
+            video: savedVideos[i]!.file.path,
+            thumbnailPath: pathThump.path,
+            maxHeight: 210,
+            quality: 100,
+          ).then((value) {
+            savedVideos[i]?.thumb = File(testPath);
+          }).catchError((e) {
+            print('error savedVideosThumbs: $e');
+          });
+        }
+        emit(UpdateThumbnailState());
+      }
+      return;
+    }
+    final Directory pathThump = Directory('${(await getTemporaryDirectory()).path}/.thumbs${primaryWhatsApp ? 'WhatsApp' : 'WhatsApp Business'}');
     pathThump.create(recursive: true);
-
     String testPath;
     for (int i = 0; i < videos.length; i++) {
-      testPath = pathThump.path +
-          '/' +
-          videos[i]!.file.path.split('/').last.split('.').first +
-          '.jpg';
+      testPath = '${pathThump.path}/${videos[i]!.file.path.split('/').last.split('.').first}.jpg';
       if (File(testPath).existsSync()) {
-        videosThumbs[i] = File(testPath);
+        videos[i]!.thumb = File(testPath);
       } else {
         await VideoThumbnail.thumbnailFile(
           imageFormat: ImageFormat.JPEG,
@@ -230,55 +272,89 @@ class StoryCubit extends Cubit<StoryStates> {
           maxHeight: 210,
           quality: 100,
         ).then((value) {
-          videosThumbs[i] = File(testPath);
+          videos[i]?.thumb = File(testPath);
         }).catchError((e) {
-          print('erorr0: $e');
+          print('error videosThumbs: $e');
         });
       }
       emit(UpdateThumbnailState());
     }
   }
 
-  bool isSelectAll = false;
-
-  selectAll() {
-    if (index == 0) {
-      for (int i in unselectedPhotosID) {
-        photos[i]!.isSelected = true;
-        selectedPhotosID.add(i);
-      }
-      unselectedPhotosID.clear();
-    } else {
-      for (int i in unselectedVideosID) {
-        videos[i]!.isSelected = true;
-        selectedVideosID.add(i);
-      }
-      unselectedVideosID.clear();
-    }
-    isSelectAll = true;
-    emit(SelectAllState());
-  }
-
   bool selectMode = false;
 
   disableSelectMode() {
+    if (!selectMode) return;
     selectMode = false;
+    emit(DisableSelectModeState());
     unSelectAll();
   }
 
+  bool isSelectAll = false;
+
+  selectAll() {
+    isSelectAll = true;
+    if (isShowSavedStatus) {
+      if (index == 0) {
+        for (int i in savedUnselectedPhotosID) {
+          savedPhotos[i]!.isSelected = true;
+          savedSelectedPhotosID.add(i);
+        }
+        savedUnselectedPhotosID.clear();
+      } else {
+        for (int i in savedUnselectedVideosID) {
+          savedVideos[i]!.isSelected = true;
+          savedSelectedVideosID.add(i);
+        }
+        savedUnselectedVideosID.clear();
+      }
+    } else  {
+      if (index == 0) {
+        for (int i in unselectedPhotosID) {
+          photos[i]!.isSelected = true;
+          selectedPhotosID.add(i);
+        }
+        unselectedPhotosID.clear();
+      } else {
+        for (int i in unselectedVideosID) {
+          videos[i]!.isSelected = true;
+          selectedVideosID.add(i);
+        }
+        unselectedVideosID.clear();
+      }
+    }
+    emit(SelectAllState());
+  }
+
   unSelectAll() {
-    if (index == 0) {
-      for (var i in selectedPhotosID) {
-        photos[i]!.isSelected = false;
-        unselectedPhotosID.add(i);
+    if (isShowSavedStatus) {
+      if (index == 0) {
+        for (var i in savedSelectedPhotosID) {
+          savedPhotos[i]!.isSelected = false;
+          savedUnselectedPhotosID.add(i);
+        }
+        savedSelectedPhotosID.clear();
+      } else {
+        for (var i in savedSelectedVideosID) {
+          savedVideos[i]!.isSelected = false;
+          savedUnselectedVideosID.add(i);
+        }
+        savedSelectedVideosID.clear();
       }
-      selectedPhotosID.clear();
-    } else {
-      for (var i in selectedVideosID) {
-        videos[i]!.isSelected = false;
-        unselectedVideosID.add(i);
+    }else {
+      if (index == 0) {
+        for (var i in selectedPhotosID) {
+          photos[i]!.isSelected = false;
+          unselectedPhotosID.add(i);
+        }
+        selectedPhotosID.clear();
+      } else {
+        for (var i in selectedVideosID) {
+          videos[i]!.isSelected = false;
+          unselectedVideosID.add(i);
+        }
+        selectedVideosID.clear();
       }
-      selectedVideosID.clear();
     }
     isSelectAll = false;
     emit(UnSelectAllState());
@@ -286,38 +362,74 @@ class StoryCubit extends Cubit<StoryStates> {
 
   selectItem(int id) {
     selectMode = true;
-    if (index == 0) {
-      photos[id]!.isSelected = true;
-      selectedPhotosID.add(id);
-      unselectedPhotosID.remove(id);
-      if (selectedPhotosID.length == photos.length) {
-        isSelectAll = true;
+    if (isShowSavedStatus) {
+      if (index == 0) {
+        savedPhotos[id]!.isSelected = true;
+        savedSelectedPhotosID.add(id);
+        savedUnselectedPhotosID.remove(id);
+        if (savedSelectedPhotosID.length == savedPhotos.length) {
+          isSelectAll = true;
+        }
+      } else {
+        savedVideos[id]!.isSelected = true;
+        savedSelectedVideosID.add(id);
+        savedUnselectedVideosID.remove(id);
+        if (savedSelectedVideosID.length == savedVideos.length) {
+          isSelectAll = true;
+        }
       }
     } else {
-      videos[id]!.isSelected = true;
-      selectedVideosID.add(id);
-      unselectedVideosID.remove(id);
-      if (selectedVideosID.length == videos.length) {
-        isSelectAll = true;
+      if (index == 0) {
+        photos[id]!.isSelected = true;
+        selectedPhotosID.add(id);
+        unselectedPhotosID.remove(id);
+        if (selectedPhotosID.length == photos.length) {
+          isSelectAll = true;
+        }
+      } else {
+        videos[id]!.isSelected = true;
+        selectedVideosID.add(id);
+        unselectedVideosID.remove(id);
+        if (selectedVideosID.length == videos.length) {
+          isSelectAll = true;
+        }
       }
     }
     emit(SelectItemState());
   }
 
   unSelectItem(int id) {
-    if (index == 0) {
-      photos[id]!.isSelected = false;
-      unselectedPhotosID.add(id);
-      selectedPhotosID.remove(id);
-      if (selectedPhotosID.isEmpty) {
-        selectMode = false;
+    if (isShowSavedStatus) {
+      if (index == 0) {
+        savedPhotos[id]!.isSelected = false;
+        savedUnselectedPhotosID.add(id);
+        savedSelectedPhotosID.remove(id);
+        if (savedSelectedPhotosID.isEmpty) {
+          selectMode = false;
+        }
+      } else {
+        savedVideos[id]!.isSelected = false;
+        savedUnselectedVideosID.add(id);
+        savedSelectedVideosID.remove(id);
+        if (savedSelectedVideosID.isEmpty) {
+          selectMode = false;
+        }
       }
     } else {
-      videos[id]!.isSelected = false;
-      unselectedVideosID.add(id);
-      selectedVideosID.remove(id);
-      if (selectedVideosID.isEmpty) {
-        selectMode = false;
+      if (index == 0) {
+        photos[id]!.isSelected = false;
+        unselectedPhotosID.add(id);
+        selectedPhotosID.remove(id);
+        if (selectedPhotosID.isEmpty) {
+          selectMode = false;
+        }
+      } else {
+        videos[id]!.isSelected = false;
+        unselectedVideosID.add(id);
+        selectedVideosID.remove(id);
+        if (selectedVideosID.isEmpty) {
+          selectMode = false;
+        }
       }
     }
     isSelectAll = false;
@@ -325,36 +437,23 @@ class StoryCubit extends Cubit<StoryStates> {
   }
 
   saveSelectStory(FileType type) async {
-    if (type == FileType.Photos) {
+    if (type == FileType.photos) {
       await Directory(saveFolder).create(recursive: true);
       for (int i in selectedPhotosID) {
-        await photos[i]!
-            .file
-            .copy(saveFolder + '/' + photos[i]!.file.path.split('/').last)
-            .catchError((e) {
-          emit(AppSaveErrorState());
-        });
+        await photos[i]!.file.copy('$saveFolder/${photos[i]!.file.path.split('/').last}');
       }
     } else {
       for (int i in selectedVideosID) {
-        await videos[i]!
-            .file
-            .copy(saveFolder + '/' + videos[i]!.file.path.split('/').last)
-            .catchError((e) {
-          emit(AppSaveErrorState());
-        });
+        await videos[i]!.file.copy('$saveFolder/${videos[i]!.file.path.split('/').last}');
       }
     }
-    toastShow(
-      text: 'Saved Successfully',
-      state: ToastStates.SUCCESS,
-    );
+    toastShow(text: 'Saved Successfully');
     disableSelectMode();
   }
 
   saveCurrentStory(File file) async {
     await Directory(saveFolder).create(recursive: true);
-    String newFile = saveFolder + '/' + file.path.split('/').last;
+    String newFile = '$saveFolder/${file.path.split('/').last}';
     file.copy(newFile).then((value) {
       toastShow(text: 'Story Saved Successfully', state: ToastStates.SUCCESS);
       emit(AppSaveSuccessState());
@@ -393,7 +492,7 @@ class StoryCubit extends Cubit<StoryStates> {
     }
     if (whatsappType != null) {
       await WhatsappShare.shareFile(
-        package: whatsappType == WhatsappType.Whatsapp
+        package: whatsappType == WhatsappType.whatsapp
             ? Package.whatsapp
             : Package.businessWhatsapp,
         phone: '+',
@@ -407,7 +506,7 @@ class StoryCubit extends Cubit<StoryStates> {
     if (isWhatsappInstalled && isWhatsapp4BInstalled) {
       askDialogRepost(
         path: path!,
-        type: FileType.Photos,
+        type: FileType.photos,
         context: context,
         shareOneFile: true,
       );
@@ -436,7 +535,7 @@ class StoryCubit extends Cubit<StoryStates> {
     // shareFilesPath.clear();
     if (whatsappType != null) {
       await WhatsappShare.shareFile(
-        package: whatsappType == WhatsappType.Whatsapp
+        package: whatsappType == WhatsappType.whatsapp
             ? Package.whatsapp
             : Package.businessWhatsapp,
         phone: '+',
@@ -447,15 +546,28 @@ class StoryCubit extends Cubit<StoryStates> {
       });
       return;
     }
-    if (type == FileType.Photos) {
-      for (var element in selectedPhotosID) {
-        shareFilesPath.add(photos[element]!.file.path);
+    if (isShowSavedStatus){
+      if (type == FileType.photos) {
+        for (var element in savedSelectedPhotosID) {
+          shareFilesPath.add(savedPhotos[element]!.file.path);
+        }
+      } else if (type == FileType.videos) {
+        for (var element in savedSelectedVideosID) {
+          shareFilesPath.add(savedVideos[element]!.file.path);
+        }
       }
-    } else if (type == FileType.Videos) {
-      for (var element in selectedVideosID) {
-        shareFilesPath.add(videos[element]!.file.path);
+    }else {
+      if (type == FileType.photos) {
+        for (var element in selectedPhotosID) {
+          shareFilesPath.add(photos[element]!.file.path);
+        }
+      } else if (type == FileType.videos) {
+        for (var element in selectedVideosID) {
+          shareFilesPath.add(videos[element]!.file.path);
+        }
       }
     }
+
     disableSelectMode();
 
     if (shareToWhatsApp) {
@@ -490,30 +602,12 @@ class StoryCubit extends Cubit<StoryStates> {
     }
   }
 
-  void switchShowOptions() {
-    showOptions = !showOptions;
-    emit(ShowOptionState());
-  }
-
-  bool showOptions = false;
 
   InterstitialAd? interstitialAd;
   BannerAd? bannerAd;
 
   void getAd() {
     emit(GetAdState());
-  }
-
-  Map<int, bool> select = {0: true, 1: false};
-  int last = 0;
-
-  selectButtonDialog({required int id}) {
-    if (last != id) {
-      select[id] = true;
-      select[last] = false;
-      last = id;
-      emit(SelectButtonDialogState());
-    }
   }
 
   getInfo() async {
@@ -523,6 +617,3 @@ class StoryCubit extends Cubit<StoryStates> {
   }
 }
 
-enum FileType { Photos, Videos }
-
-enum WhatsappType { Whatsapp, BusinessWhatsapp }

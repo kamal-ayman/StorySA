@@ -24,13 +24,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   final GetAdClass _getAdClass = GetAdClass();
-  final GetAdClass _getAdClass0 = GetAdClass();
+  // final GetAdClass _getAdClass0 = GetAdClass();
 
   @override
   void initState() {
     super.initState();
-    _getAdClass.getAd(context);
-    _getAdClass0.getAd(context);
+    // _getAdClass.getAd(context);
+    // _getAdClass0.getAd(context);
     _tabController = TabController(
         vsync: this,
         length: 2,
@@ -43,11 +43,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   void dispose() {
     super.dispose();
-    _tabController.dispose();
-    _getAdClass.bannerAd!.dispose();
-    _getAdClass0.bannerAd!.dispose();
-    _getAdClass.interstitialAd!.dispose();
-    _getAdClass0.interstitialAd!.dispose();
+    // _tabController.dispose();
+    // _getAdClass.bannerAd!.dispose();
+    // _getAdClass0.bannerAd!.dispose();
+    // _getAdClass.interstitialAd!.dispose();
+    // _getAdClass0.interstitialAd!.dispose();
   }
 
   void _loadInterstitialAd() {
@@ -78,9 +78,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       listener: (context, state) {},
       builder: (context, state) {
         var cubit = StoryCubit.get(context);
-        if (cubit.interstitialAd == null) {
-          _loadInterstitialAd();
-        }
+        // if (cubit.interstitialAd == null) {
+          // _loadInterstitialAd();
+        // }
         return WillPopScope(
           onWillPop: () async {
             if (cubit.selectMode) {
@@ -125,10 +125,27 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               icon: const Icon(CupertinoIcons.chat_bubble_text),
                               splashRadius: 20,
                               tooltip: 'open chat'),
-                        if (cubit.selectMode)
+                        if (!cubit.selectMode)
+                          IconButton(
+                              onPressed: () {
+                                cubit.changeSavedLayout();
+                                if (cubit.isShowSavedStatus && cubit.savedVideos.isEmpty || cubit.savedPhotos.isEmpty) cubit.getStatusFiles();
+                              },
+                              icon: Icon(cubit.isShowSavedStatus ? CupertinoIcons.square_stack_3d_down_right: CupertinoIcons.arrow_down_circle),
+                              splashRadius: 20,
+                              tooltip: cubit.isShowSavedStatus ? 'back to status':'saved status'),
+                        if (cubit.selectMode && !cubit.isShowSavedStatus)
                           Center(
                               child: Text(
                                   '${_tabController.index == 0 ? cubit.selectedPhotosID.length : cubit.selectedVideosID.length}',
+                                  style:
+                                      Theme.of(context).textTheme.titleLarge!.copyWith(
+                                        color: Colors.white
+                                      ))),
+                        if (cubit.selectMode && cubit.isShowSavedStatus)
+                          Center(
+                              child: Text(
+                                  '${_tabController.index == 0 ? cubit.savedSelectedPhotosID.length : cubit.savedSelectedVideosID.length}',
                                   style:
                                       Theme.of(context).textTheme.titleLarge!.copyWith(
                                         color: Colors.white
@@ -207,7 +224,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                                 : const Color(0xff008066),
                             onRefresh: () async {
                               if (_tabController.animation!.value % 1 == 0) {
-                                await cubit.statusPath();
+                                await cubit.getStatusFiles();
                               }
                             },
                             child: CustomScrollView(
@@ -223,14 +240,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                             ? _getAdClass.bannerAd!.size.height.toDouble()
                             : 0.0,
                         cubit: cubit,
-                        visible: cubit.selectedPhotosID.isNotEmpty ||
-                            cubit.selectedVideosID.isNotEmpty,
+                        visible: cubit.selectedPhotosID.isNotEmpty || cubit.selectedVideosID.isNotEmpty || cubit.savedSelectedPhotosID.isNotEmpty || cubit.savedSelectedVideosID.isNotEmpty,
                         replyFun: () {
                           cubit.shareFiles(
                             context: context,
                             type: _tabController.index == 0
-                                ? FileType.Photos
-                                : FileType.Videos,
+                                ? FileType.photos
+                                : FileType.videos,
                             shareToWhatsApp: true,
                           );
                         },
@@ -241,10 +257,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                               index: _tabController.index,
                               context: context);
                         },
-                        downloadFun: () {
+                        downloadFun:cubit.isShowSavedStatus?null: () {
                           cubit.index == 0
-                              ? cubit.saveSelectStory(FileType.Photos)
-                              : cubit.saveSelectStory(FileType.Videos);
+                              ? cubit.saveSelectStory(FileType.photos)
+                              : cubit.saveSelectStory(FileType.videos);
                         },
                       ),
                       if (_getAdClass.bannerAd != null)
@@ -313,10 +329,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         leading: FontAwesomeIcons.whatsapp,
                         onTap: () {
                           Navigator.pop(context);
+                          if (cubit.isShowSavedStatus) cubit.changeSavedLayout();
                           if (!primaryWhatsApp) {
                             if (cubit.isWhatsapp4BInstalled) {
-                              cubit.chanePathStatuses(
-                                  isNormal: !primaryWhatsApp);
+                              cubit.chanePathStatuses(isNormal: !primaryWhatsApp);
                             } else {
                               customSnackBar(true);
                             }
@@ -329,10 +345,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         leading: FontAwesomeIcons.whatsapp,
                         onTap: () async {
                           Navigator.pop(context);
+                          if (cubit.isShowSavedStatus) cubit.changeSavedLayout();
                           if (primaryWhatsApp) {
                             if (cubit.isWhatsapp4BInstalled) {
-                              cubit.chanePathStatuses(
-                                  isNormal: !primaryWhatsApp);
+                              cubit.chanePathStatuses(isNormal: !primaryWhatsApp);
                             } else {
                               customSnackBar(false);
                             }

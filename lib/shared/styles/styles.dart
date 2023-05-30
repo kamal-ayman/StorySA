@@ -6,9 +6,9 @@ import 'colors.dart';
 ThemeData lightTheme = ThemeData(
 
   // splashColor: Colors.transparent,
-  highlightColor: Colors.transparent,
+  // highlightColor: Colors.transparent,
   splashFactory: NoSplash.splashFactory,
-  primaryIconTheme: IconThemeData(
+  primaryIconTheme: const IconThemeData(
     color: Colors.white,
   ),
   appBarTheme: const AppBarTheme(
@@ -38,7 +38,7 @@ ThemeData darkTheme = ThemeData(
     bodyColor: Colors.white,
     decorationColor: Colors.white,
   ),
-  accentColor: Colors.green,
+
   primarySwatch: Colors.green,
   appBarTheme: const AppBarTheme(
     iconTheme: IconThemeData(color: Colors.white70),

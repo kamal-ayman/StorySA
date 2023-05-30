@@ -25,17 +25,17 @@ class _OpenChatScreenState extends State<OpenChatScreen> {
   @override
   void initState() {
     super.initState();
-    _getAdClass.getAd(context);
-    _getAdClass0.getAd(context);
+    // _getAdClass.getAd(context);
+    // _getAdClass0.getAd(context);
   }
 
   @override
   void dispose() {
     super.dispose();
-    _getAdClass.bannerAd!.dispose();
-    _getAdClass0.bannerAd!.dispose();
-    _getAdClass0.interstitialAd!.dispose();
-    _getAdClass.interstitialAd!.dispose();
+    // _getAdClass.bannerAd!.dispose();
+    // _getAdClass0.bannerAd!.dispose();
+    // _getAdClass0.interstitialAd!.dispose();
+    // _getAdClass.interstitialAd!.dispose();
   }
 
   @override

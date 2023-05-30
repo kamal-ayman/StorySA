@@ -42,10 +42,10 @@ class PhotosScreen extends StatelessWidget {
             ),
           ),
           widgetBuilder: (context) {
-            if (cubit.photos.isEmpty) {
-              return noStoryShow();
+            if (cubit.isShowSavedStatus? cubit.savedPhotos.isEmpty: cubit.photos.isEmpty) {
+              return noStoryShow(cubit.isShowSavedStatus);
             }
-            return buildAllItems(width, context, cubit, ItemState.Image);
+            return buildAllItems(width, context, cubit, cubit.isShowSavedStatus ? ItemState.SavedImage:ItemState.Image);
           },
         );
       },
