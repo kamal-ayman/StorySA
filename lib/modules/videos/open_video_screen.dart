@@ -10,8 +10,9 @@ import '../../shared/cubit/states.dart';
 class VideoScreen extends StatefulWidget {
   final File file;
   final int id;
+  final bool showOptions;
 
-  const VideoScreen({Key? key, required this.file, required this.id})
+  const VideoScreen({Key? key, required this.file, required this.id, required this.showOptions})
       : super(key: key);
 
   @override
@@ -23,9 +24,11 @@ class _VideoScreenState extends State<VideoScreen> {
   bool isPlaying = true;
   late VideoPlayerController controller;
 
+  late bool showOptions;
 
   @override
   void initState() {
+    showOptions = widget.showOptions;
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
     controller = VideoPlayerController.file(widget.file);
     controller.addListener(() {});
@@ -47,7 +50,6 @@ class _VideoScreenState extends State<VideoScreen> {
   }
   final listId = StoryCubit.savedUnselectedVideosID;
 
-  bool showOptions = false;
 
   @override
   Widget build(BuildContext context) {
@@ -165,7 +167,7 @@ class _VideoScreenState extends State<VideoScreen> {
                                                                 .file:cubit
                                                                 .videos[widget.id - 1]!
                                                                 .file,
-                                                            id: widget.id - 1),
+                                                            id: widget.id - 1, showOptions: showOptions,),
                                                     transitionDuration:
                                                         Duration.zero,
                                                     reverseTransitionDuration:
@@ -221,7 +223,7 @@ class _VideoScreenState extends State<VideoScreen> {
                                                                 .file:cubit
                                                                 .videos[widget.id + 1]!
                                                                 .file,
-                                                            id: widget.id + 1,
+                                                            id: widget.id + 1, showOptions: showOptions,
                                                         ),
                                                     transitionDuration:
                                                         Duration.zero,

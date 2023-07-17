@@ -80,6 +80,7 @@ Widget buildItem({
               builder: (context) => VideoScreen(
                 file: state == ItemState.SavedVideo?cubit.savedVideos[id]!.file:cubit.videos[id]!.file,
                 id: id,
+                showOptions: true,
               ),
             ),
           );

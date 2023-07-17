@@ -118,29 +118,31 @@ class StoryCubit extends Cubit<StoryStates> {
   static List<int> savedUnselectedVideosID = [];
 
 
-  void clearPhotosData(){
+  void clearPhotosData() {
     photos.clear();
     selectedPhotosID.clear();
     unselectedPhotosID.clear();
   }
 
-  void clearVideosData(){
+  void clearVideosData() {
     videos.clear();
     selectedVideosID.clear();
     unselectedVideosID.clear();
   }
-  void clearSavedPhotosData(){
+
+  void clearSavedPhotosData() {
     savedPhotos.clear();
     savedSelectedPhotosID.clear();
     savedUnselectedPhotosID.clear();
   }
 
-  void clearSavedVideosData(){
+  void clearSavedVideosData() {
     savedVideos.clear();
     savedSelectedVideosID.clear();
     savedUnselectedVideosID.clear();
   }
-  void clearData(){
+
+  void clearData() {
     photoID = 0;
     videoID = 0;
     if (isShowSavedStatus) {
@@ -154,25 +156,52 @@ class StoryCubit extends Cubit<StoryStates> {
   }
 
 
-  void sortFiles(Map<int, FileModel> files) {
-    File file;
-    for (int i = 0; i < files.length; i++) {
-      for (int j = i + 1; j < files.length; j++) {
-        if (FileStat.statSync(files[i]!.file.path).modified.isBefore(FileStat.statSync(files[j]!.file.path).modified)) {
-          file = files[i]!.file;
-          files[i]!.file = files[j]!.file;
-          files[j]!.file = file;
+  Map<int, FileModel> sortFiles(Map<int, FileModel> files) {
+    if (isShowSavedStatus) {
+      for (var i = 0; i < files.length / 2; i++) {
+        final FileModel temp = files[i]!;
+        files[i] = files[files.length - 1 - i]!;
+        files[files.length - 1 - i] = temp;
+      }
+      files.forEach((key, value) => print(value.file));
+    } else {
+      File file;
+      for (int i = 0; i < files.length; i++) {
+        for (int j = i + 1; j < files.length; j++) {
+          if (FileStat
+              .statSync(files[i]!.file.path)
+              .modified
+              .isBefore(FileStat
+              .statSync(files[j]!.file.path)
+              .modified)) {
+            file = files[i]!.file;
+            files[i]!.file = files[j]!.file;
+            files[j]!.file = file;
+          }
         }
       }
     }
+    return files;
   }
+
+  void setDefaultSort() {
+    if (isShowSavedStatus) {
+      savedPhotos = sortFiles(savedPhotos);
+      savedVideos = sortFiles(savedVideos);
+    } else {
+      photos = sortFiles(photos);
+      videos = sortFiles(videos);
+    }
+  }
+
   bool isShowSavedStatus = false;
 
-  changeSavedLayout(){
+  changeSavedLayout() {
     disableSelectMode();
     isShowSavedStatus = !isShowSavedStatus;
     emit(AppShowSavedStatusState());
   }
+
   Future getUnsortedFiles() async {
     if (!isShowSavedStatus) {
       String whatsAppStatusesPath = '/storage/emulated/0/WhatsApp/Media/.Statuses';
@@ -186,7 +215,10 @@ class StoryCubit extends Cubit<StoryStates> {
         whatsAppBusinessStatusesPath =
         '/storage/emulated/0/$newPath Business/Media/.Statuses';
       }
-      await Directory(primaryWhatsApp ? whatsAppStatusesPath : whatsAppBusinessStatusesPath).list().forEach((file) {
+      await Directory(
+          primaryWhatsApp ? whatsAppStatusesPath : whatsAppBusinessStatusesPath)
+          .list()
+          .forEach((file) {
         final String type = file.path
             .split('.')
             .last;
@@ -200,8 +232,11 @@ class StoryCubit extends Cubit<StoryStates> {
         }
       });
     } else {
+      Directory(saveFolder).create(recursive: true);
       await Directory(saveFolder).list().forEach((file) {
-        final String type = file.path.split('.').last;
+        final String type = file.path
+            .split('.')
+            .last;
         if (type == 'jpg') {
           savedPhotos.addAll({photoID: FileModel(file: File(file.path))});
           savedUnselectedPhotosID.add(photoID++);
@@ -223,8 +258,8 @@ class StoryCubit extends Cubit<StoryStates> {
 
     await getUnsortedFiles();
 
-    sortFiles(photos);
-    sortFiles(videos);
+
+    setDefaultSort();
 
     await getVideoThumbnail();
     emit(AppStatusSuccessState());
@@ -233,11 +268,17 @@ class StoryCubit extends Cubit<StoryStates> {
   Future getVideoThumbnail() async {
     if (isShowSavedStatus) {
       print('true');
-      final Directory pathThump = Directory('${(await getTemporaryDirectory()).path}/.thumbsSaved}');
+      final Directory pathThump = Directory(
+          '${(await getTemporaryDirectory()).path}/.thumbsSaved}');
       pathThump.create(recursive: true);
       String testPath;
       for (int i = 0; i < savedVideos.length; i++) {
-        testPath = '${pathThump.path}/${savedVideos[i]!.file.path.split('/').last.split('.').first}.jpg';
+        testPath = '${pathThump.path}/${savedVideos[i]!
+            .file.path
+            .split('/')
+            .last
+            .split('.')
+            .first}.jpg';
         if (File(testPath).existsSync()) {
           savedVideos[i]?.thumb = File(testPath);
         } else {
@@ -257,11 +298,19 @@ class StoryCubit extends Cubit<StoryStates> {
       }
       return;
     }
-    final Directory pathThump = Directory('${(await getTemporaryDirectory()).path}/.thumbs${primaryWhatsApp ? 'WhatsApp' : 'WhatsApp Business'}');
+    final Directory pathThump = Directory(
+        '${(await getTemporaryDirectory()).path}/.thumbs${primaryWhatsApp
+            ? 'WhatsApp'
+            : 'WhatsApp Business'}');
     pathThump.create(recursive: true);
     String testPath;
     for (int i = 0; i < videos.length; i++) {
-      testPath = '${pathThump.path}/${videos[i]!.file.path.split('/').last.split('.').first}.jpg';
+      testPath = '${pathThump.path}/${videos[i]!
+          .file.path
+          .split('/')
+          .last
+          .split('.')
+          .first}.jpg';
       if (File(testPath).existsSync()) {
         videos[i]!.thumb = File(testPath);
       } else {
@@ -308,7 +357,7 @@ class StoryCubit extends Cubit<StoryStates> {
         }
         savedUnselectedVideosID.clear();
       }
-    } else  {
+    } else {
       if (index == 0) {
         for (int i in unselectedPhotosID) {
           photos[i]!.isSelected = true;
@@ -341,7 +390,7 @@ class StoryCubit extends Cubit<StoryStates> {
         }
         savedSelectedVideosID.clear();
       }
-    }else {
+    } else {
       if (index == 0) {
         for (var i in selectedPhotosID) {
           photos[i]!.isSelected = false;
@@ -440,11 +489,17 @@ class StoryCubit extends Cubit<StoryStates> {
     if (type == FileType.photos) {
       await Directory(saveFolder).create(recursive: true);
       for (int i in selectedPhotosID) {
-        await photos[i]!.file.copy('$saveFolder/${photos[i]!.file.path.split('/').last}');
+        await photos[i]!.file.copy('$saveFolder/${photos[i]!
+            .file.path
+            .split('/')
+            .last}');
       }
     } else {
       for (int i in selectedVideosID) {
-        await videos[i]!.file.copy('$saveFolder/${videos[i]!.file.path.split('/').last}');
+        await videos[i]!.file.copy('$saveFolder/${videos[i]!
+            .file.path
+            .split('/')
+            .last}');
       }
     }
     toastShow(text: 'Saved Successfully');
@@ -453,7 +508,9 @@ class StoryCubit extends Cubit<StoryStates> {
 
   saveCurrentStory(File file) async {
     await Directory(saveFolder).create(recursive: true);
-    String newFile = '$saveFolder/${file.path.split('/').last}';
+    String newFile = '$saveFolder/${file.path
+        .split('/')
+        .last}';
     file.copy(newFile).then((value) {
       toastShow(text: 'Story Saved Successfully', state: ToastStates.SUCCESS);
       emit(AppSaveSuccessState());
@@ -513,7 +570,7 @@ class StoryCubit extends Cubit<StoryStates> {
     } else {
       await WhatsappShare.shareFile(
         package:
-            isWhatsappInstalled ? Package.whatsapp : Package.businessWhatsapp,
+        isWhatsappInstalled ? Package.whatsapp : Package.businessWhatsapp,
         phone: '+',
         filePath: [path!],
       );
@@ -546,7 +603,7 @@ class StoryCubit extends Cubit<StoryStates> {
       });
       return;
     }
-    if (isShowSavedStatus){
+    if (isShowSavedStatus) {
       if (type == FileType.photos) {
         for (var element in savedSelectedPhotosID) {
           shareFilesPath.add(savedPhotos[element]!.file.path);
@@ -556,7 +613,7 @@ class StoryCubit extends Cubit<StoryStates> {
           shareFilesPath.add(savedVideos[element]!.file.path);
         }
       }
-    }else {
+    } else {
       if (type == FileType.photos) {
         for (var element in selectedPhotosID) {
           shareFilesPath.add(photos[element]!.file.path);
@@ -588,14 +645,14 @@ class StoryCubit extends Cubit<StoryStates> {
       } else {
         await WhatsappShare.shareFile(
           package:
-              isWhatsappInstalled ? Package.whatsapp : Package.businessWhatsapp,
+          isWhatsappInstalled ? Package.whatsapp : Package.businessWhatsapp,
           phone: '+',
           filePath: shareFilesPath,
         );
       }
     } else {
       await Share.shareFiles(shareFilesPath).then(
-        (value) {
+            (value) {
           shareFilesPath.clear();
         },
       );
