@@ -47,11 +47,12 @@ class StoryCubit extends Cubit<StoryStates> {
     VideosScreen(),
   ];
 
-  Future getStoragePermission() async {
-    permissionStatus = await Permission.storage.request().then((value) {
+  Future getStoragePermission(context) async {
+    permissionStatus = await Permission.storage.request().then((value) async {
       if (value.isGranted) {
         getStatusFiles();
       } else {
+        checkPermissions(context);
         emit(PermissionDeniedState());
       }
       return value;
@@ -72,10 +73,15 @@ class StoryCubit extends Cubit<StoryStates> {
     if (status.isGranted) {
       await Directory(saveFolder).create(recursive: true);
       print("status is Granted");
-    } else if (status.isRestricted) {
+    } else if (status.isRestricted || status.isDenied) {
+      // ScaffoldMessenger.of(context).showSnackBar(
+      //   const SnackBar(
+      //     content:
+      //     Text('Please add permission for app to manage external storage'),
+      //   ),
+      // );
       status = await Permission.manageExternalStorage.request();
-    } else if (status.isDenied) {
-      status = await Permission.manageExternalStorage.request();
+
     } else if (status.isPermanentlyDenied) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(

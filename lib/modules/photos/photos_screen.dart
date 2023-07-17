@@ -27,7 +27,7 @@ class PhotosScreen extends StatelessWidget {
       builder: (context, state) {
         var cubit = StoryCubit.get(context);
         if (cubit.permissionStatus.isDenied) {
-          return permissionDeniedView(cubit);
+          return permissionDeniedView(cubit, context);
         }
         return Conditional.single(
           context: context,

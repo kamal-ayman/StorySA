@@ -235,7 +235,7 @@ Widget buildAllItems(
   );
 }
 
-Widget permissionDeniedView(StoryCubit cubit) {
+Widget permissionDeniedView(StoryCubit cubit, context) {
   return SliverFillRemaining(
     child: Center(
       child: Column(
@@ -250,7 +250,7 @@ Widget permissionDeniedView(StoryCubit cubit) {
           TextButton(
             child: const Text('Click to get Permission'),
             onPressed: () {
-              cubit.getStoragePermission();
+              cubit.getStoragePermission(context);
             },
           ),
         ],

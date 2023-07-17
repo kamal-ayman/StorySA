@@ -29,8 +29,7 @@ class StoryApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (BuildContext context) => StoryCubit()
-        ..getStoragePermission()
-        ..checkPermissions(context)
+        ..getStoragePermission(context)
         ..checkInstalledWhatsApp()..getInfo(),
       child: BlocConsumer<StoryCubit, StoryStates>(
         listener: (context, state) {},
