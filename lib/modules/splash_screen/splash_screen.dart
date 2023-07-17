@@ -5,20 +5,35 @@ import 'package:flutter/material.dart';
 import '../../layout/layout.dart';
 import '../../shared/components/constants.dart';
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
     Timer(
       const Duration(milliseconds: 500),
-      () {
+          () {
         Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (_) => const HomeScreen()));
       },
     );
+    super.initState();
+  }
 
-    imageSize() {
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+
+    double imageSize() {
       double height = MediaQuery.of(context).size.height;
       double width = MediaQuery.of(context).size.width;
       double size = height < width ? height : width;

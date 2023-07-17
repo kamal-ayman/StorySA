@@ -670,7 +670,7 @@ class StoryCubit extends Cubit<StoryStates> {
   getInfo() async {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-    print('Running on ${androidInfo.toString()}');
+    // print('Running on ${androidInfo.toString()}');
   }
 }
 

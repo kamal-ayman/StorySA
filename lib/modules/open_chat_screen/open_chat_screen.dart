@@ -118,14 +118,19 @@ class _OpenChatScreenState extends State<OpenChatScreen> {
       controller: controller,
       style: Theme.of(context).textTheme.titleLarge,
       textInputAction: TextInputAction.next,
-      textAlign: TextAlign.center,
-      cursorColor: isDark?Colors.white:Colors.green,
+      // textAlign: TextAlign.center,
+      cursorColor: isDark ? Colors.white : Colors.green,
       decoration: InputDecoration(
           labelText: text,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10.0),
           ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10.0),
+            borderSide: BorderSide(color: isDark?Colors.white:Colors.green, width: 2)
+          ),
           prefixIcon: Icon(icon),
+          prefixIconColor: isDark?Colors.white:Colors.green,
       ),
     );
   }
