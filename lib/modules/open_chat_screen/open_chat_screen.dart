@@ -24,18 +24,17 @@ class _OpenChatScreenState extends State<OpenChatScreen> {
 
   @override
   void initState() {
-    super.initState();
-    // _getAdClass.getAd(context);
-    // _getAdClass0.getAd(context);
+    super.initState();    _getAdClass.getAd(context).then((value) => setState(() {}));
+    _getAdClass0.getAd(context).then((value) => setState(() {}));
   }
 
   @override
   void dispose() {
     super.dispose();
-    // _getAdClass.bannerAd!.dispose();
-    // _getAdClass0.bannerAd!.dispose();
-    // _getAdClass0.interstitialAd!.dispose();
-    // _getAdClass.interstitialAd!.dispose();
+    _getAdClass.bannerAd!.dispose();
+    _getAdClass0.bannerAd!.dispose();
+    _getAdClass0.interstitialAd!.dispose();
+    _getAdClass.interstitialAd!.dispose();
   }
 
   @override
@@ -51,6 +50,15 @@ class _OpenChatScreenState extends State<OpenChatScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                if (_getAdClass.bannerAd != null)
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: SizedBox(
+                      width: _getAdClass.bannerAd!.size.width.toDouble(),
+                      height: _getAdClass.bannerAd!.size.height.toDouble(),
+                      child: AdWidget(ad: _getAdClass.bannerAd!),
+                    ),
+                  ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 20),
                   child: Text(
@@ -76,11 +84,12 @@ class _OpenChatScreenState extends State<OpenChatScreen> {
                               textController.text);
                         },
                         color: Colors.green,
+                        // color: isDark ? const Color(0xff1e2d31) : Colors.white,
+                        textColor: Colors.white,
                         child: const Text(
-                          'Open',
+                          'Open Chat',
                           style: TextStyle(fontSize: 20),
                         ),
-                        textColor: Colors.white,
                       ),
                     ),
                   ],
@@ -95,15 +104,7 @@ class _OpenChatScreenState extends State<OpenChatScreen> {
                       child: AdWidget(ad: _getAdClass0.bannerAd!),
                     ),
                   ),
-                if (_getAdClass.bannerAd != null)
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: SizedBox(
-                      width: _getAdClass.bannerAd!.size.width.toDouble(),
-                      height: _getAdClass.bannerAd!.size.height.toDouble(),
-                      child: AdWidget(ad: _getAdClass.bannerAd!),
-                    ),
-                  ),
+
               ],
             ),
           ),

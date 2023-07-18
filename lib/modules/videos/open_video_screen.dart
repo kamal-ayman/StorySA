@@ -11,8 +11,9 @@ class VideoScreen extends StatefulWidget {
   final File file;
   final int id;
   final bool showOptions;
+  final bool readyToAd;
 
-  const VideoScreen({Key? key, required this.file, required this.id, required this.showOptions})
+  const VideoScreen({Key? key, required this.file, required this.id, required this.showOptions, required this.readyToAd})
       : super(key: key);
 
   @override
@@ -34,7 +35,7 @@ class _VideoScreenState extends State<VideoScreen> {
     controller.addListener(() {});
     controller.setLooping(false);
     controller.initialize().then((_) => setState(() {}));
-    controller.play();
+    if (!widget.readyToAd) controller.play();
     super.initState();
   }
 
@@ -167,7 +168,7 @@ class _VideoScreenState extends State<VideoScreen> {
                                                                 .file:cubit
                                                                 .videos[widget.id - 1]!
                                                                 .file,
-                                                            id: widget.id - 1, showOptions: showOptions,),
+                                                            id: widget.id - 1, showOptions: showOptions, readyToAd: false,),
                                                     transitionDuration:
                                                         Duration.zero,
                                                     reverseTransitionDuration:
@@ -223,7 +224,7 @@ class _VideoScreenState extends State<VideoScreen> {
                                                                 .file:cubit
                                                                 .videos[widget.id + 1]!
                                                                 .file,
-                                                            id: widget.id + 1, showOptions: showOptions,
+                                                            id: widget.id + 1, showOptions: showOptions, readyToAd: false,
                                                         ),
                                                     transitionDuration:
                                                         Duration.zero,

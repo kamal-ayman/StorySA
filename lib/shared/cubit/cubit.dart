@@ -72,6 +72,7 @@ class StoryCubit extends Cubit<StoryStates> {
     print("loading status");
     if (status.isGranted) {
       await Directory(saveFolder).create(recursive: true);
+      getStatusFiles();
       print("status is Granted");
     } else if (status.isRestricted || status.isDenied) {
       // ScaffoldMessenger.of(context).showSnackBar(
@@ -666,7 +667,7 @@ class StoryCubit extends Cubit<StoryStates> {
   }
 
 
-  InterstitialAd? interstitialAd;
+  static InterstitialAd? interstitialAd;
   BannerAd? bannerAd;
 
   void getAd() {

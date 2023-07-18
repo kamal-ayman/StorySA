@@ -45,6 +45,29 @@ chooseToastColor(ToastStates state) {
 
 int adcount = 0;
 
+
+void loadInterstitialAd() {
+  InterstitialAd.load(
+    adUnitId: AdHelper.interstitialAdUnitId,
+    request: const AdRequest(),
+    adLoadCallback: InterstitialAdLoadCallback(
+      onAdLoaded: (ad) {
+        ad.fullScreenContentCallback = FullScreenContentCallback(
+          onAdDismissedFullScreenContent: (ad) {
+            // _moveToHome();
+          },
+        );
+        StoryCubit.interstitialAd = ad;
+        ad.show();
+
+      },
+      onAdFailedToLoad: (err) {
+        print('Failed to load an interstitial ad: ${err.message}');
+        StoryCubit.interstitialAd = null;
+      },
+    ),
+  );
+}
 Widget buildItem({
   required BuildContext context,
   required StoryCubit cubit,
@@ -57,20 +80,18 @@ Widget buildItem({
   return InkWell(
     onTap: () {
       /// TODO: un comments ads
-      // if (!cubit.selectMode) {
-      //   adcount++;
-      //   print(adcount);
-      //   if (adcount % 5 == 0) {
-      //     print(adcount);
-      //     cubit.interstitialAd?.show().then((value) {
-      //       cubit.interstitialAd = null;
-      //     });
-      //   }
-      //   cubit.interstitialAd?.show().then((value) {
-      //     cubit.interstitialAd;
-      //   });
-      // }
-
+      if (!cubit.selectMode) {
+        adcount++;
+        if (adcount % 5 == 0) {
+          print('adcount');
+          print(adcount);
+          loadInterstitialAd();
+          // cubit.interstitialAd?.show();
+        }
+      }
+      print('cubit.interstitialAd');
+      print(StoryCubit.interstitialAd?.request.mediationExtrasIdentifier);
+      print(StoryCubit.interstitialAd?.responseInfo);
       if (state == ItemState.Video || state == ItemState.SavedVideo) {
         if (cubit.selectMode) {
           isSelected ? cubit.unSelectItem(id) : cubit.selectItem(id);
@@ -80,7 +101,7 @@ Widget buildItem({
               builder: (context) => VideoScreen(
                 file: state == ItemState.SavedVideo?cubit.savedVideos[id]!.file:cubit.videos[id]!.file,
                 id: id,
-                showOptions: true,
+                showOptions: true, readyToAd: adcount % 5 == 0 && StoryCubit.interstitialAd != null,
               ),
             ),
           );
@@ -645,21 +666,23 @@ class GetAdClass {
   InterstitialAd? interstitialAd;
   BannerAd? bannerAd;
 
-  void getAd(context) {
-    BannerAd(
+  Future getAd(context) async {
+    bannerAd = BannerAd(
       adUnitId: AdHelper.bannerAdUnitId,
       request: const AdRequest(),
       size: AdSize.banner,
       listener: BannerAdListener(
-        onAdLoaded: (ad) {
-          bannerAd = ad as BannerAd;
-          StoryCubit.get(context).getAd();
-        },
+        onAdLoaded: (_) {},
         onAdFailedToLoad: (ad, err) {
           print('Failed to load a banner ad: ${err.message}');
           ad.dispose();
         },
       ),
-    ).load();
+    );
+    if (bannerAd != null) {
+      await bannerAd!.load();
+    } else {
+      getAd(context);
+    }
   }
 }

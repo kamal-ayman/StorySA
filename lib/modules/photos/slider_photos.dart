@@ -41,17 +41,17 @@ class _PhotosSliderState extends State<PhotosSlider> {
     });
     super.initState();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
-    // _getAdClass.getAd(context);
+    _getAdClass.getAd(context);
   }
 
   @override
   void dispose() {
 
     super.dispose();
-    // _getAdClass.bannerAd!.dispose();
-    // StoryCubit.get(context).bannerAd?.dispose();
-    // _getAdClass.bannerAd!.dispose();
-    // StoryCubit.get(context).interstitialAd?.dispose();
+    _getAdClass.bannerAd!.dispose();
+    StoryCubit.get(context).bannerAd?.dispose();
+    _getAdClass.bannerAd!.dispose();
+    StoryCubit.interstitialAd?.dispose();
   }
 
   @override

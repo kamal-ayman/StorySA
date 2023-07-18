@@ -24,13 +24,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   final GetAdClass _getAdClass = GetAdClass();
-  // final GetAdClass _getAdClass0 = GetAdClass();
+  final GetAdClass _getAdClass0 = GetAdClass();
 
   @override
   void initState() {
     super.initState();
-    // _getAdClass.getAd(context);
-    // _getAdClass0.getAd(context);
+    _getAdClass.getAd(context);
+    _getAdClass0.getAd(context);
     _tabController = TabController(
         vsync: this,
         length: 2,
@@ -38,38 +38,24 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     _tabController.addListener(() {
       StoryCubit.get(context).changeIndex(_tabController.index);
     });
+    loadInterstitialAd();
+    // loadAdFor3Min();
+
   }
 
+  loadAdFor3Min() async {
+    await Future.delayed(const Duration(minutes: 3));
+    loadInterstitialAd();
+    loadAdFor3Min();
+  }
   @override
   void dispose() {
     super.dispose();
-    // _tabController.dispose();
-    // _getAdClass.bannerAd!.dispose();
-    // _getAdClass0.bannerAd!.dispose();
-    // _getAdClass.interstitialAd!.dispose();
-    // _getAdClass0.interstitialAd!.dispose();
-  }
-
-  void _loadInterstitialAd() {
-    InterstitialAd.load(
-      adUnitId: AdHelper.interstitialAdUnitId,
-      request: const AdRequest(),
-      adLoadCallback: InterstitialAdLoadCallback(
-        onAdLoaded: (ad) {
-          ad.fullScreenContentCallback = FullScreenContentCallback(
-            onAdDismissedFullScreenContent: (ad) {
-              // _moveToHome();
-            },
-          );
-          setState(() {
-            StoryCubit.get(context).interstitialAd = ad;
-          });
-        },
-        onAdFailedToLoad: (err) {
-          print('Failed to load an interstitial ad: ${err.message}');
-        },
-      ),
-    );
+    _tabController.dispose();
+    _getAdClass.bannerAd!.dispose();
+    _getAdClass0.bannerAd!.dispose();
+    _getAdClass.interstitialAd!.dispose();
+    _getAdClass0.interstitialAd!.dispose();
   }
 
   @override
@@ -78,9 +64,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       listener: (context, state) {},
       builder: (context, state) {
         var cubit = StoryCubit.get(context);
-        // if (cubit.interstitialAd == null) {
-          // _loadInterstitialAd();
-        // }
+
         return WillPopScope(
           onWillPop: () async {
             if (cubit.selectMode) {
