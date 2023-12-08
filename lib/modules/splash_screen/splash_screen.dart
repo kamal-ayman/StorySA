@@ -1,12 +1,15 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:whatsapp_story/modules/is_active_screen/is_active_screen.dart';
+import 'package:whatsapp_story/shared/cubit/cubit.dart';
 
 import '../../layout/layout.dart';
 import '../../shared/components/constants.dart';
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({super.key});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();

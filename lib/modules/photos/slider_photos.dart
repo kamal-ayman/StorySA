@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:whatsapp_story/shared/cubit/cubit.dart';
@@ -90,14 +93,23 @@ class _PhotosSliderState extends State<PhotosSlider> {
                   cubit: cubit,
                   visible: true,
                   replyFun: () {
+
+                      File file = cubit.isShowSavedStatus ? cubit.savedPhotos[id]!.file:cubit.photos[id]!.file;
+                      XFile xFile = XFile(file.path);
+
                     cubit.shareOneFile(
-                        path: cubit.isShowSavedStatus ? cubit.savedPhotos[id]!.file.path:cubit.photos[id]!.file.path,
+                        xFile: xFile,
                         toWhatsapp: true,
                         context: context);
                   },
                   shareFun: () {
+                    File file = cubit.isShowSavedStatus ? cubit.savedPhotos[id]!.file:cubit.photos[id]!.file;
+                    XFile xFile = XFile(file.path);
+
                     cubit.shareOneFile(
-                        path: cubit.isShowSavedStatus ? cubit.savedPhotos[id]!.file.path:cubit.photos[id]!.file.path, toWhatsapp: false);
+                        xFile: xFile,
+                        toWhatsapp: false,
+                    );
                   },
                   downloadFun: () {
                     cubit.saveCurrentStory(cubit.isShowSavedStatus ? cubit.savedPhotos[id]!.file:cubit.photos[id]!.file);

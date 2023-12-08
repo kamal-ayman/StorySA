@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "794298777213",
+    "project_id": "storysa-da8d4",
+    "storage_bucket": "storysa-da8d4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:794298777213:android:051d966fdfa22400c73b14",
+        "android_client_info": {
+          "package_name": "com.storysaverapp.oliver"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "794298777213-ccqtka6dh5fcvjfskrnt2bbbb3684m61.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAcTpSF23BS4czv6KP2pdcoUV5zvSOGMFU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "794298777213-ccqtka6dh5fcvjfskrnt2bbbb3684m61.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      },
+      "admob_app_id": "ca-app-pub-7136012509023664~5819177311"
+    }
+  ],
+  "configuration_version": "1"
+}

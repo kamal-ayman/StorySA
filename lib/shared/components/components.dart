@@ -271,7 +271,7 @@ Widget permissionDeniedView(StoryCubit cubit, context) {
           TextButton(
             child: const Text('Click to get Permission'),
             onPressed: () {
-              cubit.getStoragePermission(context);
+              cubit.getStoragePermission();
             },
           ),
         ],
@@ -481,11 +481,17 @@ Future<void> aboutUsDialog({
               defaultLinkButton(
                   color: Colors.blue,
                   title: 'LinkedIn',
-                  link: 'https://www.linkedin.com/in/kamal-ayman/'),
+                  scheme: 'https',
+                  host: 'www.linkedin.com',
+                  path: 'in/kamal-ayman',
+              ),
               defaultLinkButton(
                   color: Colors.blue.shade900,
                   title: 'Facebook',
-                  link: 'https://www.facebook.com/kamalayman159/'),
+                  scheme: 'https',
+                  host: 'www.facebook.com',
+                  path: 'kamalayman159',
+              ),
             ],
           ),
         ),
@@ -574,7 +580,7 @@ Widget defaultSelectButton({
         if (shareOneFile) {
           StoryCubit.get(context).shareOneFile(
             context: context,
-            path: path,
+            xFile: path,
             toWhatsapp: true,
             whatsappType:
                 id == 0 ? WhatsappType.whatsapp : WhatsappType.businessWhatsapp,
@@ -621,12 +627,20 @@ Widget defaultSelectButton({
 
 Widget defaultLinkButton({
   required String title,
-  required String link,
+  required String scheme,
+  required String host,
+  required String path,
+  Map<String, dynamic>? queryParameters,
   required Color color,
 }) {
   return MaterialButton(
     onPressed: () {
-      launch(link);
+      launchUrl(Uri(
+        scheme: scheme,
+        host: host,
+        path: path,
+        queryParameters: queryParameters,
+      ));
     },
     height: 40,
     color: color,

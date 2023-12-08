@@ -23,6 +23,7 @@ class SelectPhotoState extends StoryStates {}
 class UnSelectPhotoState extends StoryStates {}
 
 class UnSelectAllState extends StoryStates {}
+
 class DisableSelectModeState extends StoryStates {}
 
 class SelectVideoState extends StoryStates {}
@@ -52,3 +53,5 @@ class AppDownloadSuccessState extends StoryStates {}
 class AppDownloadErrorState extends StoryStates {}
 
 class AppShowSavedStatusState extends StoryStates {}
+
+class AppIsActivateState extends StoryStates {}

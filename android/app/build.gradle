@@ -22,6 +22,9 @@ if (flutterVersionName == null) {
 }
 
 apply plugin: 'com.android.application'
+// START: FlutterFire Configuration
+apply plugin: 'com.google.gms.google-services'
+// END: FlutterFire Configuration
 apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
@@ -36,7 +39,7 @@ if (keystorePropertiesFile.exists()) {
 
 android {
 
-    compileSdkVersion 33
+    compileSdkVersion 34
     buildToolsVersion "21.1.2"
 
 
@@ -64,8 +67,8 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "com.storysaverapp.oliver"
-        minSdkVersion 21
-        targetSdkVersion 33
+        minSdkVersion 23
+        targetSdkVersion 34
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
