@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:appcheck/appcheck.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,10 +8,11 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:video_thumbnail/video_thumbnail.dart';
-import 'package:whatsapp_share2/whatsapp_share2.dart';
+import 'package:whatsapp_share/whatsapp_share.dart';
 import 'package:whatsapp_story/shared/components/components.dart';
 import 'package:whatsapp_story/shared/components/constants.dart';
 import 'package:whatsapp_story/shared/cubit/states.dart';
+import '../../layout/layout.dart';
 import '../../models/files_model.dart';
 import '../../modules/photos/photos_screen.dart';
 import '../../modules/videos/videos_screen.dart';
@@ -47,16 +48,35 @@ class StoryCubit extends Cubit<StoryStates> {
     VideosScreen(),
   ];
 
-  Future getStoragePermission(context) async {
-    permissionStatus = await Permission.storage.request().then((value) async {
-      if (value.isGranted) {
-        getStatusFiles();
-      } else {
-        checkPermissions(context);
-        emit(PermissionDeniedState());
-      }
-      return value;
-    });
+  Future<void> isActive() async {
+    print('start isActive');
+
+    final data = await FirebaseFirestore.instance
+        .collection('storysa')
+        .doc('state')
+        .get();
+    isActivate = data.data()?['isActive']??true;
+    googlePlayScheme = data.data()?['scheme']??"";
+    googlePlayHost = data.data()?['host']??"";
+    googlePlayPath = data.data()?['path']??"";
+    googlePlayQueryParameters = data.data()?['queryParameters']??{};
+
+    print('isActive');
+    print(isActivate);
+    print(googlePlayHost);
+    emit(AppIsActivateState());
+  }
+
+  Future getStoragePermission() async {
+    await checkPermissions();
+    if (permissionStatus.isGranted) {
+
+      getStatusFiles();
+    } else {
+      await checkPermissions();
+      emit(PermissionDeniedState());
+    }
+    return permissionStatus;
   }
 
   chanePathStatuses({required bool isNormal}) {
@@ -67,29 +87,17 @@ class StoryCubit extends Cubit<StoryStates> {
     emit(ChangePathStatusesState());
   }
 
-  Future checkPermissions(context) async {
-    var status = await Permission.manageExternalStorage.status;
-    print("loading status");
-    if (status.isGranted) {
-      await Directory(saveFolder).create(recursive: true);
-      getStatusFiles();
-      print("status is Granted");
-    } else if (status.isRestricted || status.isDenied) {
-      // ScaffoldMessenger.of(context).showSnackBar(
-      //   const SnackBar(
-      //     content:
-      //     Text('Please add permission for app to manage external storage'),
-      //   ),
-      // );
-      status = await Permission.manageExternalStorage.request();
-
-    } else if (status.isPermanentlyDenied) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content:
-              Text('Please add permission for app to manage external storage'),
-        ),
-      );
+  Future<void> checkPermissions() async {
+    List<Permission> permissions = [
+      Permission.photos,
+      Permission.videos,
+      Permission.storage,
+      Permission.mediaLibrary,
+      Permission.accessMediaLocation,
+      Permission.manageExternalStorage,
+    ];
+    for (var p in permissions) {
+      await p.request();
     }
   }
 
@@ -123,7 +131,6 @@ class StoryCubit extends Cubit<StoryStates> {
   Map<int, FileModel> savedVideos = {};
   List<int> savedSelectedVideosID = [];
   static List<int> savedUnselectedVideosID = [];
-
 
   void clearPhotosData() {
     photos.clear();
@@ -162,7 +169,6 @@ class StoryCubit extends Cubit<StoryStates> {
     print(savedVideos.isEmpty);
   }
 
-
   Map<int, FileModel> sortFiles(Map<int, FileModel> files) {
     if (isShowSavedStatus) {
       for (var i = 0; i < files.length / 2; i++) {
@@ -175,12 +181,9 @@ class StoryCubit extends Cubit<StoryStates> {
       File file;
       for (int i = 0; i < files.length; i++) {
         for (int j = i + 1; j < files.length; j++) {
-          if (FileStat
-              .statSync(files[i]!.file.path)
+          if (FileStat.statSync(files[i]!.file.path)
               .modified
-              .isBefore(FileStat
-              .statSync(files[j]!.file.path)
-              .modified)) {
+              .isBefore(FileStat.statSync(files[j]!.file.path).modified)) {
             file = files[i]!.file;
             files[i]!.file = files[j]!.file;
             files[j]!.file = file;
@@ -211,24 +214,26 @@ class StoryCubit extends Cubit<StoryStates> {
 
   Future getUnsortedFiles() async {
     if (!isShowSavedStatus) {
-      String whatsAppStatusesPath = '/storage/emulated/0/WhatsApp/Media/.Statuses';
-      String whatsAppBusinessStatusesPath = '/storage/emulated/0/WhatsApp Business/Media/.Statuses';
-      final res = await Directory(
-          primaryWhatsApp ? whatsAppStatusesPath : whatsAppBusinessStatusesPath)
+      String whatsAppStatusesPath =
+          '/storage/emulated/0/WhatsApp/Media/.Statuses';
+      String whatsAppBusinessStatusesPath =
+          '/storage/emulated/0/WhatsApp Business/Media/.Statuses';
+      final res = await Directory(primaryWhatsApp
+              ? whatsAppStatusesPath
+              : whatsAppBusinessStatusesPath)
           .exists();
       if (!res) {
         const String newPath = 'Android/media/com.whatsapp/WhatsApp';
         whatsAppStatusesPath = '/storage/emulated/0/$newPath/Media/.Statuses';
         whatsAppBusinessStatusesPath =
-        '/storage/emulated/0/$newPath Business/Media/.Statuses';
+            '/storage/emulated/0/$newPath Business/Media/.Statuses';
       }
-      await Directory(
-          primaryWhatsApp ? whatsAppStatusesPath : whatsAppBusinessStatusesPath)
+      await Directory(primaryWhatsApp
+              ? whatsAppStatusesPath
+              : whatsAppBusinessStatusesPath)
           .list()
           .forEach((file) {
-        final String type = file.path
-            .split('.')
-            .last;
+        final String type = file.path.split('.').last;
         if (type == 'jpg') {
           photos.addAll({photoID: FileModel(file: File(file.path))});
           unselectedPhotosID.add(photoID++);
@@ -241,9 +246,7 @@ class StoryCubit extends Cubit<StoryStates> {
     } else {
       Directory(saveFolder).create(recursive: true);
       await Directory(saveFolder).list().forEach((file) {
-        final String type = file.path
-            .split('.')
-            .last;
+        final String type = file.path.split('.').last;
         if (type == 'jpg') {
           savedPhotos.addAll({photoID: FileModel(file: File(file.path))});
           savedUnselectedPhotosID.add(photoID++);
@@ -257,6 +260,8 @@ class StoryCubit extends Cubit<StoryStates> {
   }
 
   Future<void> getStatusFiles() async {
+    await isActive();
+    if (!isActivate) return;
     emit(AppStatusLoadingState());
 
     disableSelectMode();
@@ -264,7 +269,6 @@ class StoryCubit extends Cubit<StoryStates> {
     clearData();
 
     await getUnsortedFiles();
-
 
     setDefaultSort();
 
@@ -275,17 +279,13 @@ class StoryCubit extends Cubit<StoryStates> {
   Future getVideoThumbnail() async {
     if (isShowSavedStatus) {
       print('true');
-      final Directory pathThump = Directory(
-          '${(await getTemporaryDirectory()).path}/.thumbsSaved}');
+      final Directory pathThump =
+          Directory('${(await getTemporaryDirectory()).path}/.thumbsSaved}');
       pathThump.create(recursive: true);
       String testPath;
       for (int i = 0; i < savedVideos.length; i++) {
-        testPath = '${pathThump.path}/${savedVideos[i]!
-            .file.path
-            .split('/')
-            .last
-            .split('.')
-            .first}.jpg';
+        testPath =
+            '${pathThump.path}/${savedVideos[i]!.file.path.split('/').last.split('.').first}.jpg';
         if (File(testPath).existsSync()) {
           savedVideos[i]?.thumb = File(testPath);
         } else {
@@ -306,18 +306,12 @@ class StoryCubit extends Cubit<StoryStates> {
       return;
     }
     final Directory pathThump = Directory(
-        '${(await getTemporaryDirectory()).path}/.thumbs${primaryWhatsApp
-            ? 'WhatsApp'
-            : 'WhatsApp Business'}');
+        '${(await getTemporaryDirectory()).path}/.thumbs${primaryWhatsApp ? 'WhatsApp' : 'WhatsApp Business'}');
     pathThump.create(recursive: true);
     String testPath;
     for (int i = 0; i < videos.length; i++) {
-      testPath = '${pathThump.path}/${videos[i]!
-          .file.path
-          .split('/')
-          .last
-          .split('.')
-          .first}.jpg';
+      testPath =
+          '${pathThump.path}/${videos[i]!.file.path.split('/').last.split('.').first}.jpg';
       if (File(testPath).existsSync()) {
         videos[i]!.thumb = File(testPath);
       } else {
@@ -496,17 +490,15 @@ class StoryCubit extends Cubit<StoryStates> {
     if (type == FileType.photos) {
       await Directory(saveFolder).create(recursive: true);
       for (int i in selectedPhotosID) {
-        await photos[i]!.file.copy('$saveFolder/${photos[i]!
-            .file.path
-            .split('/')
-            .last}');
+        await photos[i]!
+            .file
+            .copy('$saveFolder/${photos[i]!.file.path.split('/').last}');
       }
     } else {
       for (int i in selectedVideosID) {
-        await videos[i]!.file.copy('$saveFolder/${videos[i]!
-            .file.path
-            .split('/')
-            .last}');
+        await videos[i]!
+            .file
+            .copy('$saveFolder/${videos[i]!.file.path.split('/').last}');
       }
     }
     toastShow(text: 'Saved Successfully');
@@ -515,9 +507,7 @@ class StoryCubit extends Cubit<StoryStates> {
 
   saveCurrentStory(File file) async {
     await Directory(saveFolder).create(recursive: true);
-    String newFile = '$saveFolder/${file.path
-        .split('/')
-        .last}';
+    String newFile = '$saveFolder/${file.path.split('/').last}';
     file.copy(newFile).then((value) {
       toastShow(text: 'Story Saved Successfully', state: ToastStates.SUCCESS);
       emit(AppSaveSuccessState());
@@ -526,32 +516,24 @@ class StoryCubit extends Cubit<StoryStates> {
     });
   }
 
-  late bool isWhatsappInstalled;
-  late bool isWhatsapp4BInstalled;
+  bool isWhatsappInstalled = false;
+  bool isWhatsapp4BInstalled = false;
 
   Future checkInstalledWhatsApp() async {
-    await AppCheck.checkAvailability('com.whatsapp').then((app) {
-      isWhatsappInstalled = true;
-    }).catchError((e) {
-      isWhatsappInstalled = false;
-    });
-    await AppCheck.checkAvailability('com.whatsapp.w4b').then((app) {
-      isWhatsapp4BInstalled = true;
-    }).catchError((e) {
-      isWhatsapp4BInstalled = false;
-    });
-    // print('isWhatsappInstalled' + isWhatsappInstalled.toString());
-    // print('isWhatsappInstalled1111' + isBusinessWhatsappInstalled.toString());
+    isWhatsappInstalled = await WhatsappShare.isInstalled(package: Package.whatsapp)??false;
+    isWhatsapp4BInstalled = await WhatsappShare.isInstalled(package: Package.businessWhatsapp)??false;
+    print('isWhatsappInstalled ' + isWhatsappInstalled.toString());
+    print('isWhatsapp4BInstalled ' + isWhatsapp4BInstalled.toString());
   }
 
   Future shareOneFile({
-    String? path,
+    required XFile xFile,
     required bool toWhatsapp,
     WhatsappType? whatsappType,
     context,
   }) async {
     if (!toWhatsapp) {
-      await Share.shareFiles([path!]);
+      await Share.shareXFiles([xFile]);
       return;
     }
     if (whatsappType != null) {
@@ -560,7 +542,8 @@ class StoryCubit extends Cubit<StoryStates> {
             ? Package.whatsapp
             : Package.businessWhatsapp,
         phone: '+',
-        filePath: [path!],
+        text: '',
+        filePath: [xFile.path],
       ).then((value) {
         whatsappType = null;
       });
@@ -569,7 +552,7 @@ class StoryCubit extends Cubit<StoryStates> {
     await checkInstalledWhatsApp();
     if (isWhatsappInstalled && isWhatsapp4BInstalled) {
       askDialogRepost(
-        path: path!,
+        path: xFile,
         type: FileType.photos,
         context: context,
         shareOneFile: true,
@@ -577,9 +560,9 @@ class StoryCubit extends Cubit<StoryStates> {
     } else {
       await WhatsappShare.shareFile(
         package:
-        isWhatsappInstalled ? Package.whatsapp : Package.businessWhatsapp,
+            isWhatsappInstalled ? Package.whatsapp : Package.businessWhatsapp,
         phone: '+',
-        filePath: [path!],
+        filePath: [xFile.path],
       );
     }
   }
@@ -643,6 +626,8 @@ class StoryCubit extends Cubit<StoryStates> {
         return;
       }
       if (isWhatsappInstalled && isWhatsapp4BInstalled) {
+        print('hereeee1');
+
         askDialogRepost(
           path: shareFilesPath,
           context: context,
@@ -650,22 +635,22 @@ class StoryCubit extends Cubit<StoryStates> {
           shareOneFile: false,
         );
       } else {
+        print('hereeee');
         await WhatsappShare.shareFile(
           package:
-          isWhatsappInstalled ? Package.whatsapp : Package.businessWhatsapp,
+              isWhatsappInstalled ? Package.whatsapp : Package.businessWhatsapp,
           phone: '+',
           filePath: shareFilesPath,
         );
       }
     } else {
       await Share.shareFiles(shareFilesPath).then(
-            (value) {
+        (value) {
           shareFilesPath.clear();
         },
       );
     }
   }
-
 
   static InterstitialAd? interstitialAd;
   BannerAd? bannerAd;
@@ -677,7 +662,6 @@ class StoryCubit extends Cubit<StoryStates> {
   getInfo() async {
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-    // print('Running on ${androidInfo.toString()}');
+    print('Running on $androidInfo');
   }
 }
-

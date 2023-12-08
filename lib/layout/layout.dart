@@ -1,19 +1,20 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:open_store/open_store.dart';
+import 'package:whatsapp_story/modules/is_active_screen/is_active_screen.dart';
 import 'package:whatsapp_story/shared/components/components.dart';
 import 'package:whatsapp_story/shared/cubit/states.dart';
-import '../ad_helper.dart';
 import '../modules/open_chat_screen/open_chat_screen.dart';
 import '../modules/settings/settings.dart';
 import '../shared/components/constants.dart';
 import '../shared/cubit/cubit.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -40,11 +41,10 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     });
     loadInterstitialAd();
     // loadAdFor3Min();
-
   }
 
   loadAdFor3Min() async {
-    await Future.delayed(const Duration(minutes: 3));
+    await Future.delayed(const Duration(minutes: 1));
     loadInterstitialAd();
     loadAdFor3Min();
   }
@@ -61,10 +61,20 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<StoryCubit, StoryStates>(
-      listener: (context, state) {},
+      listener: (context, state) {
+        if (state is AppIsActivateState) {
+          if (!isActivate) {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (context) => const IsActiveScreen(),
+              ),
+                  (route) => false,
+            );
+          }
+        }
+      },
       builder: (context, state) {
         var cubit = StoryCubit.get(context);
-
         return WillPopScope(
           onWillPop: () async {
             if (cubit.selectMode) {

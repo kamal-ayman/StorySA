@@ -33,8 +33,8 @@ class _OpenChatScreenState extends State<OpenChatScreen> {
     super.dispose();
     _getAdClass.bannerAd!.dispose();
     _getAdClass0.bannerAd!.dispose();
-    _getAdClass0.interstitialAd!.dispose();
-    _getAdClass.interstitialAd!.dispose();
+    _getAdClass0.interstitialAd?.dispose();
+    _getAdClass.interstitialAd?.dispose();
   }
 
   @override
